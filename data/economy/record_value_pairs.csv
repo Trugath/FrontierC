@@ -1,0 +1,9 @@
+passage,reward_multiplier
+interaction:text_passage_on_a_fast_ship,2
+interaction:text_passage_for_two_people_on_a_fast_ship,3
+interaction:text_passage_for_a_small_group,4
+interaction:text_passage_for_a_small_group,5
+interaction:text_passage_on_a_ship_for_a_group,6
+interaction:text_passage_on_a_ship_for_a_group,7
+interaction:text_passage_on_a_ship_for_a_group,8
+interaction:text_a_ship_to_take_a_small_package,1

@@ -1,0 +1,17 @@
+reward,subject
+3000,interaction:text_empty_413
+3500,interaction:text_empty_413
+4000,interaction:text_empty_413
+4500,interaction:text_empty_413
+5000,interaction:text_empty_413
+6000,interaction:text_the_merchant
+6500,interaction:text_the_merchant
+7000,interaction:text_the_merchant
+8000,interaction:text_mr_of_corp
+8500,interaction:text_mr_of_corp
+9000,interaction:text_mr_of_corp
+10000,interaction:text_director_of_corp
+13000,interaction:text_mafia_boss
+15000,interaction:text_president_of_corp
+17500,interaction:text_governor
+20000,interaction:text_senator

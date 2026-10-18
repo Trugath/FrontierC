@@ -1,0 +1,11 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x0cfe6a81,0xa4aaf407,frontier,root,main_model_032,0,0,0,0,0,"61 Cygni A,B",0,0,0
+0x07088981,0x6e3bac8e,"61 Cygni A,B",42,main_model_158,0x0a4a7414,0,0,0,5000,61 Cygni A,1,1,0
+0x05f5e101,0x19323797,"61 Cygni A,B",42,main_model_158,0x0a4a7414,0x8000,0,0,4900,61 Cygni B,1,1,0
+0x00000277,0x05bd776b,61 Cygni A,22,main_model_140,0x00227673,0,83,0x1036,-5,Scott,2,2,0
+0xfff60000,0xd3be857d,Scott,verbatim,main_model_098,0,0xaaab,0,0,20,Amundsen,0,3,0
+0x00068fb1,0x6bb3f13f,"61 Cygni A,B",root,main_model_032,0x75357c1a,0,283,0x2d15,-250,"61 Cygni A,B 1,2",0,1,0
+0x00038271,0x4addccd8,"61 Cygni A,B 1,2",30,main_model_146,0x00340b08,0,0,0x7222,-260,"61 Cygni A,B 1",1,2,0
+0x00030d41,0xd6515cca,"61 Cygni A,B 1,2",30,main_model_146,0x00340b08,0x8000,0,0x7222,-260,"61 Cygni A,B 2",1,2,0
+0x00000024,0x3d882792,"61 Cygni A,B 2",10,main_model_130,0x00002ee0,0,84,0x72a1,-213,"61 Cygni A,B 2a",2,2,0
+0x00000004,0x97956edf,"61 Cygni A,B 1,2",4,main_model_128,0x01d46348,0,92,0x7ae1,-270,"61 Cygni A,B 1,2a",1,2,0

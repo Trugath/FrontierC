@@ -1,0 +1,382 @@
+{
+  "$schema": "scripts.schema.json",
+  "format": "frontier-speaker-scripts-v1",
+  "patterns": [
+    {
+      "name": "pattern_steady",
+      "commands": [
+        {
+          "op": "wait",
+          "ticks": 255
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_noise",
+      "commands": [
+        {
+          "op": "noise_on"
+        },
+        {
+          "op": "wait",
+          "ticks": 255
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_fall_three",
+      "commands": [
+        {
+          "op": "loop",
+          "count": 255,
+          "commands": [
+            {
+              "op": "pitch_delta",
+              "steps": -3
+            }
+          ]
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_alternate_48",
+      "commands": [
+        {
+          "op": "loop",
+          "count": 255,
+          "commands": [
+            {
+              "op": "pitch_delta",
+              "steps": 48
+            },
+            {
+              "op": "pitch_delta",
+              "steps": -48
+            }
+          ]
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_fall_five_rise_two",
+      "commands": [
+        {
+          "op": "loop",
+          "count": 255,
+          "commands": [
+            {
+              "op": "pitch_delta",
+              "steps": -5
+            },
+            {
+              "op": "pitch_delta",
+              "steps": 2
+            }
+          ]
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_rising_noise",
+      "commands": [
+        {
+          "op": "noise_on"
+        },
+        {
+          "op": "loop",
+          "count": 255,
+          "commands": [
+            {
+              "op": "pitch_delta",
+              "steps": 1
+            }
+          ]
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_fall_two",
+      "commands": [
+        {
+          "op": "loop",
+          "count": 255,
+          "commands": [
+            {
+              "op": "pitch_delta",
+              "steps": -2
+            }
+          ]
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_nested_alternation",
+      "commands": [
+        {
+          "op": "loop",
+          "count": 4,
+          "commands": [
+            {
+              "op": "loop",
+              "count": 9,
+              "commands": [
+                {
+                  "op": "pitch_delta",
+                  "steps": -46
+                },
+                {
+                  "op": "pitch_delta",
+                  "steps": 49
+                }
+              ]
+            },
+            {
+              "op": "loop",
+              "count": 9,
+              "commands": [
+                {
+                  "op": "pitch_delta",
+                  "steps": -49
+                },
+                {
+                  "op": "pitch_delta",
+                  "steps": 46
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_fall_four_rise_four",
+      "commands": [
+        {
+          "op": "loop",
+          "count": 255,
+          "commands": [
+            {
+              "op": "pitch_delta",
+              "steps": -4
+            },
+            {
+              "op": "pitch_delta",
+              "steps": 4
+            }
+          ]
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    },
+    {
+      "name": "pattern_nested_sweep",
+      "commands": [
+        {
+          "op": "loop",
+          "count": 4,
+          "commands": [
+            {
+              "op": "loop",
+              "count": 50,
+              "commands": [
+                {
+                  "op": "pitch_delta",
+                  "steps": -48
+                },
+                {
+                  "op": "pitch_delta",
+                  "steps": 49
+                }
+              ]
+            },
+            {
+              "op": "pitch_delta",
+              "steps": -50
+            }
+          ]
+        },
+        {
+          "op": "finish_note"
+        }
+      ]
+    }
+  ],
+  "effects": [
+    {
+      "name": "effect_silence",
+      "commands": [
+        {
+          "op": "end"
+        }
+      ]
+    },
+    {
+      "name": "effect_falling_tones",
+      "commands": [
+        {
+          "op": "note",
+          "pattern": "pattern_steady",
+          "note": 200,
+          "ticks": 5
+        },
+        {
+          "op": "note",
+          "pattern": "pattern_steady",
+          "note": 188,
+          "ticks": 2
+        },
+        {
+          "op": "end"
+        }
+      ]
+    },
+    {
+      "name": "effect_paired_sweeps",
+      "commands": [
+        {
+          "op": "note",
+          "pattern": "pattern_alternate_48",
+          "note": 170,
+          "ticks": 16
+        },
+        {
+          "op": "note",
+          "pattern": "pattern_fall_five_rise_two",
+          "note": 170,
+          "ticks": 60
+        },
+        {
+          "op": "end"
+        }
+      ]
+    },
+    {
+      "name": "effect_noise_burst",
+      "commands": [
+        {
+          "op": "note",
+          "pattern": "pattern_rising_noise",
+          "note": 32,
+          "ticks": 40
+        },
+        {
+          "op": "end"
+        }
+      ]
+    },
+    {
+      "name": "effect_noise_then_tone",
+      "commands": [
+        {
+          "op": "note",
+          "pattern": "pattern_rising_noise",
+          "note": 40,
+          "ticks": 80
+        },
+        {
+          "op": "note",
+          "pattern": "pattern_noise",
+          "note": 5,
+          "ticks": 200
+        },
+        {
+          "op": "end"
+        }
+      ]
+    },
+    {
+      "name": "effect_low_falling_tones",
+      "commands": [
+        {
+          "op": "note",
+          "pattern": "pattern_steady",
+          "note": 150,
+          "ticks": 5
+        },
+        {
+          "op": "note",
+          "pattern": "pattern_steady",
+          "note": 138,
+          "ticks": 2
+        },
+        {
+          "op": "end"
+        }
+      ]
+    },
+    {
+      "name": "effect_nested_sweep",
+      "commands": [
+        {
+          "op": "note",
+          "pattern": "pattern_nested_sweep",
+          "note": 200,
+          "ticks": 0
+        },
+        {
+          "op": "end"
+        }
+      ]
+    },
+    {
+      "name": "effect_nested_alternation",
+      "commands": [
+        {
+          "op": "note",
+          "pattern": "pattern_nested_alternation",
+          "note": 100,
+          "ticks": 0
+        },
+        {
+          "op": "end"
+        }
+      ]
+    },
+    {
+      "name": "effect_paired_alternations",
+      "commands": [
+        {
+          "op": "note",
+          "pattern": "pattern_fall_four_rise_four",
+          "note": 220,
+          "ticks": 30
+        },
+        {
+          "op": "note",
+          "pattern": "pattern_fall_four_rise_four",
+          "note": 204,
+          "ticks": 30
+        },
+        {
+          "op": "end"
+        }
+      ]
+    }
+  ]
+}

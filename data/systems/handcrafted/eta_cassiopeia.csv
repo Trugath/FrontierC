@@ -1,0 +1,21 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x0c02a561,0x43e1d604,frontier,44,main_model_160,0,0,0,0,5900,Eta Cassiopeia,2,0,0
+0x00000027,0x9d003e89,Eta Cassiopeia,6,main_model_126,0x000fcd22,0,258,0x3b05,460,Rock,0,1,0
+0x0007b0c1,0xcf019875,Eta Cassiopeia,32,main_model_150,0x00503cbb,0,0,0x00b6,14,Between,1,1,0x1c71
+0x00000041,0x012abcfe,Between,18,main_model_136,0x0000caed,0,104,0x0147,15,Navy Central,1,2,0x1111
+0x00000001,0xfd83a612,Navy Central,large_shape_7,0x0058,0x000000b4,0,0,0x081b,15,Morgue's Mortuary,10,2,0
+0x00000263,0x07834536,Eta Cassiopeia,20,main_model_138,0x00503cbb,0xd555,0,0x00b6,24,Trojan,1,1,0x0e38
+0xfff60000,0xb8742e03,Trojan,verbatim,main_model_096,0,0,0,0x24fa,20,New Kyoto,0,3,0
+0xfff60000,0xbb4b74fe,Trojan,verbatim,main_model_094,0,0xfa50,0,0x1a4f,20,Sunnyville,0,3,0
+0xfff60000,0xa2c7c25f,Trojan,verbatim,main_model_094,0,0xafa5,0,0x1999,20,Venice on Land,0,3,0
+0xfff60000,0xd4701269,Trojan,verbatim,main_model_092,0,0x1777,0,0x1d27,20,Manchester,0,3,0
+0xfff60000,0xa461c8d6,Trojan,verbatim,main_model_090,0,0xddde,0,0x27d2,20,Epping Newtown,0,3,0
+0x00000001,0x56fd1a6b,Trojan,large_shape_7,0x0058,0x00000274,0x5555,0,0x4e38,15,J.F.Kennedy,10,2,0
+0x00000006,0x00124534,Trojan,4,main_model_128,0x00000d80,0,54,0x03a0,-20,New Moon,0,2,0
+0x000001fa,0x01cfd75f,Eta Cassiopeia,20,main_model_138,0x00503cbb,0x2aaa,0,0x00b6,10,Feynman,1,1,0x71c7
+0xfff60000,0xb2a94cf3,Feynman,verbatim,main_model_096,0,0xdc72,0,0x1555,20,Naunton Estates,0,3,0
+0xfff60000,0xe3172d7a,Feynman,verbatim,main_model_094,0,0x8000,0,0x04fa,20,Tarbit's Landing,0,3,0
+0x00000001,0x4ebb49f2,Feynman,66,main_model_086,0x00000274,0x5555,0,0xb1c7,15,Angus Manwaring,11,2,0
+0x0121eac1,0x118a3bdb,Eta Cassiopeia,40,main_model_154,0x104fab10,0x8e38,45,0x038e,3200,Eta Cassiopeia B,2,1,0x3555
+0x0000000a,0x95a8ce87,Eta Cassiopeia B,6,main_model_126,0x000f4240,0,350,0x35e6,-81,Firing Range,1,2,0x78e3
+0x00002329,0x7f801234,Eta Cassiopeia,26,main_model_148,0x389a6e97,0,55,0x00b6,-249,Eta Cassiopeia 5,2,1,0x705b

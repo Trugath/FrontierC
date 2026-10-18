@@ -1,0 +1,458 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frontier station layout",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "frontier-station-layout-v1"
+    },
+    "actions": {
+      "type": "object",
+      "properties": {
+        "menu": {
+          "$ref": "#/$defs/display"
+        },
+        "conversation": {
+          "$ref": "#/$defs/display"
+        },
+        "bulletin": {
+          "$ref": "#/$defs/display"
+        },
+        "trade": {
+          "$ref": "#/$defs/display"
+        },
+        "fitting": {
+          "$ref": "#/$defs/display"
+        },
+        "shipyard": {
+          "$ref": "#/$defs/display"
+        },
+        "ship": {
+          "$ref": "#/$defs/display"
+        },
+        "missions": {
+          "$ref": "#/$defs/display"
+        },
+        "repairs": {
+          "$ref": "#/$defs/display"
+        }
+      },
+      "required": [
+        "menu",
+        "conversation",
+        "bulletin",
+        "trade",
+        "fitting",
+        "shipyard",
+        "ship",
+        "missions",
+        "repairs"
+      ],
+      "additionalProperties": false
+    },
+    "pagination_text_x": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 319
+    },
+    "widget_groups": {
+      "type": "object",
+      "properties": {
+        "flight_menu": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/widget"
+          },
+          "minItems": 1
+        },
+        "station_menu": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/widget"
+          },
+          "minItems": 1
+        },
+        "secondary_rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/widget"
+          },
+          "minItems": 1
+        },
+        "primary_rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/widget"
+          },
+          "minItems": 1
+        },
+        "footer": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/widget"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "flight_menu",
+        "station_menu",
+        "secondary_rows",
+        "primary_rows",
+        "footer"
+      ],
+      "additionalProperties": false
+    },
+    "widget_sets": {
+      "type": "object",
+      "properties": {
+        "flight": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "flight_menu",
+              "station_menu",
+              "secondary_rows",
+              "primary_rows",
+              "footer"
+            ]
+          },
+          "minItems": 1
+        },
+        "station": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "flight_menu",
+              "station_menu",
+              "secondary_rows",
+              "primary_rows",
+              "footer"
+            ]
+          },
+          "minItems": 1
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "flight_menu",
+              "station_menu",
+              "secondary_rows",
+              "primary_rows",
+              "footer"
+            ]
+          },
+          "minItems": 1
+        },
+        "board": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "flight_menu",
+              "station_menu",
+              "secondary_rows",
+              "primary_rows",
+              "footer"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "flight",
+        "station",
+        "list",
+        "board"
+      ],
+      "additionalProperties": false
+    },
+    "drives": {
+      "type": "object",
+      "properties": {
+        "none": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_1": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_2": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_3": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_4": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_5": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_6": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_7": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_8": {
+          "$ref": "#/$defs/drive"
+        },
+        "class_9": {
+          "$ref": "#/$defs/drive"
+        },
+        "military_class_1": {
+          "$ref": "#/$defs/drive"
+        },
+        "military_class_2": {
+          "$ref": "#/$defs/drive"
+        },
+        "military_class_3": {
+          "$ref": "#/$defs/drive"
+        },
+        "military_class_4": {
+          "$ref": "#/$defs/drive"
+        },
+        "interplanetary": {
+          "$ref": "#/$defs/drive"
+        }
+      },
+      "required": [
+        "none",
+        "class_1",
+        "class_2",
+        "class_3",
+        "class_4",
+        "class_5",
+        "class_6",
+        "class_7",
+        "class_8",
+        "class_9",
+        "military_class_1",
+        "military_class_2",
+        "military_class_3",
+        "military_class_4",
+        "interplanetary"
+      ],
+      "additionalProperties": false
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/repair"
+      },
+      "minItems": 18,
+      "maxItems": 18
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "actions",
+    "pagination_text_x",
+    "widget_groups",
+    "widget_sets",
+    "drives",
+    "repairs"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "text": {
+      "type": "string",
+      "pattern": "^(flight|interaction|status):[a-z][a-z0-9_]*$"
+    },
+    "interaction_text": {
+      "type": "string",
+      "pattern": "^interaction:[a-z][a-z0-9_]*$"
+    },
+    "display": {
+      "type": "object",
+      "properties": {
+        "visible_rows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 45
+        },
+        "row_spacing": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 199
+        },
+        "text_x": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 319
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 45
+        },
+        "continue_to": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/interaction_text"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "visible_rows",
+        "row_spacing",
+        "text_x",
+        "page_size",
+        "continue_to"
+      ],
+      "additionalProperties": false
+    },
+    "widget_action": {
+      "oneOf": [
+        {
+          "enum": [
+            "next_page",
+            "previous_page",
+            "continue"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "menu_key": {
+              "enum": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ]
+            }
+          },
+          "required": [
+            "menu_key"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "primary_row": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 13
+            }
+          },
+          "required": [
+            "primary_row"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "secondary_row": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 13
+            }
+          },
+          "required": [
+            "secondary_row"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "widget": {
+      "type": "object",
+      "properties": {
+        "bounds": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 319
+            },
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 199
+            },
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 320
+            },
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 200
+            }
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "action": {
+          "$ref": "#/$defs/widget_action"
+        }
+      },
+      "required": [
+        "bounds",
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "drive": {
+      "type": "object",
+      "properties": {
+        "trade_in_value": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "name_text": {
+          "$ref": "#/$defs/text"
+        },
+        "mass": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        }
+      },
+      "required": [
+        "trade_in_value",
+        "name_text",
+        "mass"
+      ],
+      "additionalProperties": false
+    },
+    "repair": {
+      "type": "object",
+      "properties": {
+        "damage_flag": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 17
+        },
+        "name_text": {
+          "$ref": "#/$defs/interaction_text"
+        },
+        "charge": {
+          "type": "integer",
+          "minimum": -32768,
+          "maximum": 32767
+        }
+      },
+      "required": [
+        "damage_flag",
+        "name_text",
+        "charge"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,4 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x07088981,0xb253d398,frontier,42,main_model_158,0,0,0,0,5000,Lave,0,0,0
+0x00000257,0x012c1835,Lave,20,main_model_138,0x002275fb,0,38,0,14,Planet Lave,1,1,0
+0x00000001,0xc7b57bbb,Planet Lave,64,main_model_084,0x00000274,0x5555,0,0xb1c7,15,Lave Station,12,2,0

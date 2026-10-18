@@ -1,0 +1,8 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x01298be1,0xa6e7e436,frontier,36,main_model_154,0,0,450,0x38e3,3200,Ross 154,2,0,0x3555
+0x00000029,0x24aeb45a,Ross 154,4,main_model_128,0x0006cd92,0,9,0x028f,-51,Dust Ball,0,1,0
+0x00010041,0x8d4078ff,Ross 154,26,main_model_148,0x0016ad3e,0x6e38,9,0x01fd,-20,Aster,3,1,0x0e38
+0x0000001a,0xadddaabd,Aster,20,main_model_140,0x00001a47,0x671c,26,0x1555,-4,Merlin,1,2,0x2aaa
+0xfff60000,0x5c16a57c,Merlin,verbatim,main_model_098,0,0x78e4,0,0,20,Sirocco Station,0,3,0
+0x00000008,0x522ffee2,Aster,6,main_model_126,0x00001f97,0,26,0x0d82,-40,Willow,1,2,0x2aaa
+0x0000001e,0x2b0415ba,Ross 154,6,main_model_126,0x00c753c8,0,146,0x03c4,-185,Ross 154 3,1,1,0x071c

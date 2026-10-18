@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frontier PC-speaker scripts",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "patterns",
+    "effects"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "format": {
+      "const": "frontier-speaker-scripts-v1"
+    },
+    "patterns": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "commands"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "commands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/patternCommand"
+            }
+          }
+        }
+      }
+    },
+    "effects": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "commands"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "commands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/effectCommand"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "patternCommand": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "ticks"
+          ],
+          "properties": {
+            "op": {
+              "const": "wait"
+            },
+            "ticks": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "steps"
+          ],
+          "properties": {
+            "op": {
+              "const": "pitch_delta"
+            },
+            "steps": {
+              "type": "integer",
+              "minimum": -128,
+              "maximum": 127,
+              "not": {
+                "enum": [
+                  -128,
+                  -127,
+                  -126,
+                  -125,
+                  126,
+                  127
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "count",
+            "commands"
+          ],
+          "properties": {
+            "op": {
+              "const": "loop"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            },
+            "commands": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/patternCommand"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op"
+          ],
+          "properties": {
+            "op": {
+              "const": "noise_on"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op"
+          ],
+          "properties": {
+            "op": {
+              "const": "noise_off"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op"
+          ],
+          "properties": {
+            "op": {
+              "const": "finish_note"
+            }
+          }
+        }
+      ]
+    },
+    "effectCommand": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "pattern",
+            "note",
+            "ticks"
+          ],
+          "properties": {
+            "op": {
+              "const": "note"
+            },
+            "pattern": {
+              "type": "string"
+            },
+            "note": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 254
+                },
+                {
+                  "const": "keep"
+                }
+              ]
+            },
+            "ticks": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "ticks"
+          ],
+          "properties": {
+            "op": {
+              "const": "pause"
+            },
+            "ticks": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op"
+          ],
+          "properties": {
+            "op": {
+              "const": "end"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

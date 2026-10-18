@@ -1,0 +1,13 @@
+first_fine
+additional_fine
+traffic_control
+launch_clearance
+evading_fine
+weapon_discharge
+illegal_mining
+illegal_trade
+bribery
+smuggling
+dumping
+permit_violation
+piracy_murder

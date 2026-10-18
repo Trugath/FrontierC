@@ -1,0 +1,12 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x0a408301,0x98963b6c,frontier,root,main_model_032,0,0,0,0,0,"Wolf 630 A,B",0,0,0
+0x056f9a01,0x95b5aba6,"Wolf 630 A,B",40,main_model_154,0x01fe39c6,0,0,0x438e,3400,Wolf 630 A,1,1,0
+0x04d0e901,0xab0aeeb2,"Wolf 630 A,B",40,main_model_154,0x01fe39c6,0x8000,0,0x438e,3350,Wolf 630 B,1,1,0
+0x08f872a1,0x7234567f,"Wolf 630 A,B",50,main_model_174,0x2e1b2af0,0x471c,0,0,10700,Van Biesbroeck 8,12,1,0
+0x000ef421,0xfedcba98,Van Biesbroeck 8,34,main_model_152,0x01000ae0,0,90,0x5555,1200,McCarthy,3,2,0x071c
+0x0000026d,0x00054321,McCarthy,20,main_model_138,0x000143e9,0,14,0x1bbb,24,Landfall,3,2,0x638e
+0xfff60000,0x75e0ffab,Landfall,verbatim,main_model_094,0,0xaaab,0,0,20,Mayflower City,0,3,0
+0x00000001,0x885254e1,Landfall,66,main_model_086,0x000001f4,0,0,0,15,Mayflower High,11,2,0
+0x27384881,0x67daab4f,"Wolf 630 A,B",root,main_model_032,0xffffffff,0xb8e3,0,0x4eca,0,"Wolf 629 A,B",0,1,0
+0x02793d61,0x113bd35c,"Wolf 629 A,B",40,main_model_154,0x002c3835,0,0,0xae03,3200,Wolf 629 A,1,2,0
+0x02719c41,0x7c8168e1,"Wolf 629 A,B",40,main_model_154,0x002c3835,0x8000,0,0xae03,3150,Wolf 629 B,1,2,0

@@ -1,0 +1,12 @@
+offence,score,fine,alert,message,find_police,threshold
+traffic_control,5,1000,yes,yes,no,0
+launch_clearance,8,500,no,yes,no,0
+evading_fine,15,2000,yes,yes,no,0
+weapon_discharge,20,600,yes,yes,yes,8
+illegal_mining,20,200,yes,yes,yes,16
+illegal_trade,20,0,no,no,no,8
+bribery,25,0,no,no,no,0
+smuggling,30,2500,no,yes,no,0
+dumping,40,3000,yes,yes,yes,22
+permit_violation,80,4000,yes,yes,yes,99
+piracy_murder,300,10000,yes,yes,yes,20

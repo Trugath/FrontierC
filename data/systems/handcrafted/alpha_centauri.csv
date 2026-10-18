@@ -1,0 +1,12 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x17b8ff81,0xaf7e4909,frontier,root,main_model_032,0,0,0,0,0,"Alpha Centauri A,B",0,0,0
+0x0d1cef01,0xe0dcf2a5,"Alpha Centauri A,B",44,main_model_160,0x0319e941,0,0,0,5900,Alpha Centauri A,0,1,0
+0x0a9c1081,0x98ec3d54,"Alpha Centauri A,B",42,main_model_158,0x0319e941,0x8000,0,0,5000,Alpha Centauri B,0,1,0
+0x0002bf21,0xffffffff,"Alpha Centauri A,B",30,main_model_146,0x0633d282,0x4000,3,0x0024,-208,Lagrange,1,1,0x38e3
+0x00000007,0xb11744fb,Lagrange,4,main_model_128,0x00004e20,0,3,0x3abc,-217,2042 L1,0,2,0
+0x00002711,0x6317ac81,"Alpha Centauri A,B",26,main_model_148,0x35a4e900,0,87,0x08e3,-245,2071 AC3,0,1,0x7c71
+0x00000002,0x8d173381,2071 AC3,4,main_model_128,0x00001e2a,0,178,0x33e9,-253,2075 AC3a,0,2,0
+0x01312d01,0xeca12ec3,"Alpha Centauri A,B",36,main_model_154,0xffffffff,0,450,0x38e3,3300,Proxima Centauri,2,1,0x3555
+0x000001c9,0x584ab152,Proxima Centauri,16,main_model_142,0x00061a80,0,10,0x36e5,3,Eden,2,2,0x2aaa
+0x00000001,0x1cb0b6eb,Eden,64,main_model_084,0x0000012c,0,0,0,15,Eden Station,12,2,0
+0x00000007,0x2266792b,Proxima Centauri,4,main_model_128,0x000f4240,0,350,0x35e6,-81,2045 PC2,1,2,0x78e3

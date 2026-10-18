@@ -1,0 +1,787 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frontier cockpit layout",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "frontier-cockpit-layout-v1"
+    },
+    "weapons": {
+      "type": "object",
+      "properties": {
+        "dummy_mine": {
+          "type": "object",
+          "properties": {
+            "even_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            },
+            "odd_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "even_slot_sprite",
+            "odd_slot_sprite"
+          ],
+          "additionalProperties": false
+        },
+        "proximity_mine": {
+          "type": "object",
+          "properties": {
+            "even_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            },
+            "odd_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "even_slot_sprite",
+            "odd_slot_sprite"
+          ],
+          "additionalProperties": false
+        },
+        "homing_missile": {
+          "type": "object",
+          "properties": {
+            "even_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            },
+            "odd_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "even_slot_sprite",
+            "odd_slot_sprite"
+          ],
+          "additionalProperties": false
+        },
+        "smart_missile": {
+          "type": "object",
+          "properties": {
+            "even_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            },
+            "odd_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "even_slot_sprite",
+            "odd_slot_sprite"
+          ],
+          "additionalProperties": false
+        },
+        "naval_missile": {
+          "type": "object",
+          "properties": {
+            "even_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            },
+            "odd_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "even_slot_sprite",
+            "odd_slot_sprite"
+          ],
+          "additionalProperties": false
+        },
+        "nuclear_missile": {
+          "type": "object",
+          "properties": {
+            "even_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            },
+            "odd_slot_sprite": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "even_slot_sprite",
+            "odd_slot_sprite"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "dummy_mine",
+        "proximity_mine",
+        "homing_missile",
+        "smart_missile",
+        "naval_missile",
+        "nuclear_missile"
+      ],
+      "additionalProperties": false
+    },
+    "equipment_slots": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "prefixItems": [
+          {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 319
+          },
+          {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 199
+          }
+        ],
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "minItems": 8,
+      "maxItems": 8
+    },
+    "commands": {
+      "type": "object",
+      "properties": {
+        "activate_selected": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[ -~]$"
+            },
+            "bounds": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 320
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200
+                }
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "key",
+            "bounds"
+          ],
+          "additionalProperties": false
+        },
+        "activate_ecm": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[ -~]$"
+            },
+            "bounds": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 320
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200
+                }
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "key",
+            "bounds"
+          ],
+          "additionalProperties": false
+        },
+        "escape_capsule": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[ -~]$"
+            },
+            "bounds": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 320
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200
+                }
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "key",
+            "bounds"
+          ],
+          "additionalProperties": false
+        },
+        "energy_bomb": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[ -~]$"
+            },
+            "bounds": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 320
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200
+                }
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "key",
+            "bounds"
+          ],
+          "additionalProperties": false
+        },
+        "toggle_cloud_analysis": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[ -~]$"
+            },
+            "bounds": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 320
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200
+                }
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "key",
+            "bounds"
+          ],
+          "additionalProperties": false
+        },
+        "toggle_target_stats": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[ -~]$"
+            },
+            "bounds": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 320
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200
+                }
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "key",
+            "bounds"
+          ],
+          "additionalProperties": false
+        },
+        "ship_command": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[ -~]$"
+            },
+            "bounds": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 320
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 200
+                }
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "key",
+            "bounds"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "activate_selected",
+        "activate_ecm",
+        "escape_capsule",
+        "energy_bomb",
+        "toggle_cloud_analysis",
+        "toggle_target_stats",
+        "ship_command"
+      ],
+      "additionalProperties": false
+    },
+    "target_marker": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -32768,
+              "maximum": 32767
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -32768,
+              "maximum": 32767
+            },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "target_labels": {
+      "type": "object",
+      "properties": {
+        "unprojected": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "position": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "text",
+            "position"
+          ],
+          "additionalProperties": false
+        },
+        "upper_left": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "position": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "text",
+            "position"
+          ],
+          "additionalProperties": false
+        },
+        "upper_right": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "position": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "text",
+            "position"
+          ],
+          "additionalProperties": false
+        },
+        "lower_left": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "position": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "text",
+            "position"
+          ],
+          "additionalProperties": false
+        },
+        "lower_right": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "position": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "text",
+            "position"
+          ],
+          "additionalProperties": false
+        },
+        "unprojected_other": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "position": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 199
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "text",
+            "position"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "unprojected",
+        "upper_left",
+        "upper_right",
+        "lower_left",
+        "lower_right",
+        "unprojected_other"
+      ],
+      "additionalProperties": false
+    },
+    "drive_labels": {
+      "type": "object",
+      "properties": {
+        "none": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_1": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_2": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_3": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_4": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_5": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_6": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_7": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_8": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class_9": {
+          "type": "string",
+          "minLength": 1
+        },
+        "military_class_1": {
+          "type": "string",
+          "minLength": 1
+        },
+        "military_class_2": {
+          "type": "string",
+          "minLength": 1
+        },
+        "military_class_3": {
+          "type": "string",
+          "minLength": 1
+        },
+        "military_class_4": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interplanetary": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "none",
+        "class_1",
+        "class_2",
+        "class_3",
+        "class_4",
+        "class_5",
+        "class_6",
+        "class_7",
+        "class_8",
+        "class_9",
+        "military_class_1",
+        "military_class_2",
+        "military_class_3",
+        "military_class_4",
+        "interplanetary"
+      ],
+      "additionalProperties": false
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "weapons",
+    "equipment_slots",
+    "commands",
+    "target_marker",
+    "target_labels",
+    "drive_labels"
+  ],
+  "additionalProperties": false
+}

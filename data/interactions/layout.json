@@ -1,0 +1,720 @@
+{
+  "$schema": "layout.schema.json",
+  "format": "frontier-station-layout-v1",
+  "actions": {
+    "menu": {
+      "visible_rows": 4,
+      "row_spacing": 35,
+      "text_x": 140,
+      "page_size": 4,
+      "continue_to": null
+    },
+    "conversation": {
+      "visible_rows": 14,
+      "row_spacing": 10,
+      "text_x": 140,
+      "page_size": 14,
+      "continue_to": null
+    },
+    "bulletin": {
+      "visible_rows": 4,
+      "row_spacing": 35,
+      "text_x": 140,
+      "page_size": 4,
+      "continue_to": null
+    },
+    "trade": {
+      "visible_rows": 14,
+      "row_spacing": 10,
+      "text_x": 152,
+      "page_size": 14,
+      "continue_to": null
+    },
+    "fitting": {
+      "visible_rows": 14,
+      "row_spacing": 10,
+      "text_x": 152,
+      "page_size": 14,
+      "continue_to": "interaction:text_shipyard_ships_refitted_repaired_bought_and_sold_also_contact_wi"
+    },
+    "shipyard": {
+      "visible_rows": 14,
+      "row_spacing": 10,
+      "text_x": 152,
+      "page_size": 14,
+      "continue_to": "interaction:text_shipyard_ships_refitted_repaired_bought_and_sold_also_contact_wi"
+    },
+    "ship": {
+      "visible_rows": 14,
+      "row_spacing": 10,
+      "text_x": 152,
+      "page_size": 14,
+      "continue_to": "interaction:text_new_and_reconditioned_ships_ships_part_exchanged"
+    },
+    "missions": {
+      "visible_rows": 4,
+      "row_spacing": 35,
+      "text_x": 140,
+      "page_size": 4,
+      "continue_to": null
+    },
+    "repairs": {
+      "visible_rows": 14,
+      "row_spacing": 10,
+      "text_x": 140,
+      "page_size": 0,
+      "continue_to": "interaction:text_shipyard_ships_refitted_repaired_bought_and_sold_also_contact_wi"
+    }
+  },
+  "pagination_text_x": 152,
+  "widget_groups": {
+    "flight_menu": [
+      {
+        "bounds": [
+          30,
+          20,
+          38,
+          28
+        ],
+        "action": {
+          "menu_key": "1"
+        }
+      },
+      {
+        "bounds": [
+          30,
+          50,
+          38,
+          58
+        ],
+        "action": {
+          "menu_key": "2"
+        }
+      },
+      {
+        "bounds": [
+          30,
+          80,
+          38,
+          88
+        ],
+        "action": {
+          "menu_key": "3"
+        }
+      },
+      {
+        "bounds": [
+          30,
+          110,
+          38,
+          118
+        ],
+        "action": {
+          "menu_key": "4"
+        }
+      },
+      {
+        "bounds": [
+          30,
+          140,
+          38,
+          148
+        ],
+        "action": {
+          "menu_key": "5"
+        }
+      }
+    ],
+    "station_menu": [
+      {
+        "bounds": [
+          124,
+          15,
+          132,
+          23
+        ],
+        "action": {
+          "menu_key": "1"
+        }
+      },
+      {
+        "bounds": [
+          124,
+          50,
+          132,
+          58
+        ],
+        "action": {
+          "menu_key": "2"
+        }
+      },
+      {
+        "bounds": [
+          124,
+          85,
+          132,
+          93
+        ],
+        "action": {
+          "menu_key": "3"
+        }
+      },
+      {
+        "bounds": [
+          124,
+          120,
+          132,
+          128
+        ],
+        "action": {
+          "menu_key": "4"
+        }
+      },
+      {
+        "bounds": [
+          124,
+          157,
+          132,
+          166
+        ],
+        "action": "next_page"
+      },
+      {
+        "bounds": [
+          136,
+          157,
+          144,
+          166
+        ],
+        "action": "previous_page"
+      }
+    ],
+    "secondary_rows": [
+      {
+        "bounds": [
+          136,
+          15,
+          144,
+          23
+        ],
+        "action": {
+          "secondary_row": 0
+        }
+      },
+      {
+        "bounds": [
+          136,
+          25,
+          144,
+          33
+        ],
+        "action": {
+          "secondary_row": 1
+        }
+      },
+      {
+        "bounds": [
+          136,
+          35,
+          144,
+          43
+        ],
+        "action": {
+          "secondary_row": 2
+        }
+      },
+      {
+        "bounds": [
+          136,
+          45,
+          144,
+          53
+        ],
+        "action": {
+          "secondary_row": 3
+        }
+      },
+      {
+        "bounds": [
+          136,
+          55,
+          144,
+          63
+        ],
+        "action": {
+          "secondary_row": 4
+        }
+      },
+      {
+        "bounds": [
+          136,
+          65,
+          144,
+          73
+        ],
+        "action": {
+          "secondary_row": 5
+        }
+      },
+      {
+        "bounds": [
+          136,
+          75,
+          144,
+          83
+        ],
+        "action": {
+          "secondary_row": 6
+        }
+      },
+      {
+        "bounds": [
+          136,
+          85,
+          144,
+          93
+        ],
+        "action": {
+          "secondary_row": 7
+        }
+      },
+      {
+        "bounds": [
+          136,
+          95,
+          144,
+          103
+        ],
+        "action": {
+          "secondary_row": 8
+        }
+      },
+      {
+        "bounds": [
+          136,
+          105,
+          144,
+          113
+        ],
+        "action": {
+          "secondary_row": 9
+        }
+      },
+      {
+        "bounds": [
+          136,
+          115,
+          144,
+          123
+        ],
+        "action": {
+          "secondary_row": 10
+        }
+      },
+      {
+        "bounds": [
+          136,
+          125,
+          144,
+          133
+        ],
+        "action": {
+          "secondary_row": 11
+        }
+      },
+      {
+        "bounds": [
+          136,
+          135,
+          144,
+          143
+        ],
+        "action": {
+          "secondary_row": 12
+        }
+      },
+      {
+        "bounds": [
+          136,
+          145,
+          144,
+          153
+        ],
+        "action": {
+          "secondary_row": 13
+        }
+      }
+    ],
+    "primary_rows": [
+      {
+        "bounds": [
+          124,
+          15,
+          132,
+          23
+        ],
+        "action": {
+          "primary_row": 0
+        }
+      },
+      {
+        "bounds": [
+          124,
+          25,
+          132,
+          33
+        ],
+        "action": {
+          "primary_row": 1
+        }
+      },
+      {
+        "bounds": [
+          124,
+          35,
+          132,
+          43
+        ],
+        "action": {
+          "primary_row": 2
+        }
+      },
+      {
+        "bounds": [
+          124,
+          45,
+          132,
+          53
+        ],
+        "action": {
+          "primary_row": 3
+        }
+      },
+      {
+        "bounds": [
+          124,
+          55,
+          132,
+          63
+        ],
+        "action": {
+          "primary_row": 4
+        }
+      },
+      {
+        "bounds": [
+          124,
+          65,
+          132,
+          73
+        ],
+        "action": {
+          "primary_row": 5
+        }
+      },
+      {
+        "bounds": [
+          124,
+          75,
+          132,
+          83
+        ],
+        "action": {
+          "primary_row": 6
+        }
+      },
+      {
+        "bounds": [
+          124,
+          85,
+          132,
+          93
+        ],
+        "action": {
+          "primary_row": 7
+        }
+      },
+      {
+        "bounds": [
+          124,
+          95,
+          132,
+          103
+        ],
+        "action": {
+          "primary_row": 8
+        }
+      },
+      {
+        "bounds": [
+          124,
+          105,
+          132,
+          113
+        ],
+        "action": {
+          "primary_row": 9
+        }
+      },
+      {
+        "bounds": [
+          124,
+          115,
+          132,
+          123
+        ],
+        "action": {
+          "primary_row": 10
+        }
+      },
+      {
+        "bounds": [
+          124,
+          125,
+          132,
+          133
+        ],
+        "action": {
+          "primary_row": 11
+        }
+      },
+      {
+        "bounds": [
+          124,
+          135,
+          132,
+          143
+        ],
+        "action": {
+          "primary_row": 12
+        }
+      },
+      {
+        "bounds": [
+          124,
+          145,
+          132,
+          153
+        ],
+        "action": {
+          "primary_row": 13
+        }
+      }
+    ],
+    "footer": [
+      {
+        "bounds": [
+          124,
+          157,
+          132,
+          166
+        ],
+        "action": "next_page"
+      },
+      {
+        "bounds": [
+          136,
+          157,
+          144,
+          166
+        ],
+        "action": "previous_page"
+      },
+      {
+        "bounds": [
+          200,
+          157,
+          208,
+          166
+        ],
+        "action": "continue"
+      }
+    ]
+  },
+  "widget_sets": {
+    "flight": [
+      "flight_menu"
+    ],
+    "station": [
+      "station_menu"
+    ],
+    "list": [
+      "secondary_rows",
+      "primary_rows",
+      "footer"
+    ],
+    "board": [
+      "primary_rows",
+      "footer"
+    ]
+  },
+  "drives": {
+    "none": {
+      "trade_in_value": 0,
+      "name_text": "status:text_074_none",
+      "mass": 0
+    },
+    "class_1": {
+      "trade_in_value": 5,
+      "name_text": "interaction:text_interplanetary_drive",
+      "mass": 4
+    },
+    "class_2": {
+      "trade_in_value": 8,
+      "name_text": "interaction:text_class_1_hyperdrive",
+      "mass": 10
+    },
+    "class_3": {
+      "trade_in_value": 15,
+      "name_text": "interaction:text_class_2_hyperdrive",
+      "mass": 25
+    },
+    "class_4": {
+      "trade_in_value": 30,
+      "name_text": "interaction:text_class_3_hyperdrive",
+      "mass": 45
+    },
+    "class_5": {
+      "trade_in_value": 60,
+      "name_text": "interaction:text_class_4_hyperdrive",
+      "mass": 80
+    },
+    "class_6": {
+      "trade_in_value": 120,
+      "name_text": "interaction:text_class_5_hyperdrive",
+      "mass": 150
+    },
+    "class_7": {
+      "trade_in_value": 240,
+      "name_text": "interaction:text_class_6_hyperdrive",
+      "mass": 250
+    },
+    "class_8": {
+      "trade_in_value": 480,
+      "name_text": "interaction:text_class_7_hyperdrive",
+      "mass": 400
+    },
+    "class_9": {
+      "trade_in_value": 950,
+      "name_text": "status:text_012_class_8_hyperdrive",
+      "mass": 600
+    },
+    "military_class_1": {
+      "trade_in_value": 25,
+      "name_text": "interaction:text_class_1_military_drive",
+      "mass": 6
+    },
+    "military_class_2": {
+      "trade_in_value": 50,
+      "name_text": "interaction:text_class_2_military_drive",
+      "mass": 12
+    },
+    "military_class_3": {
+      "trade_in_value": 100,
+      "name_text": "interaction:text_class_3_military_drive",
+      "mass": 24
+    },
+    "military_class_4": {
+      "trade_in_value": 250,
+      "name_text": "status:text_013_class_4_military_drive",
+      "mass": 42
+    },
+    "interplanetary": {
+      "trade_in_value": 0,
+      "name_text": "flight:mode_unknown",
+      "mass": 0
+    }
+  },
+  "repairs": [
+    {
+      "damage_flag": 0,
+      "name_text": "interaction:text_cargo_bay_life_support",
+      "charge": 150
+    },
+    {
+      "damage_flag": 1,
+      "name_text": "interaction:text_cargo_bay_life_support",
+      "charge": 150
+    },
+    {
+      "damage_flag": 2,
+      "name_text": "interaction:text_scanner",
+      "charge": 175
+    },
+    {
+      "damage_flag": 3,
+      "name_text": "interaction:text_e_c_m_system",
+      "charge": 300
+    },
+    {
+      "damage_flag": 4,
+      "name_text": "interaction:text_fuel_scoop",
+      "charge": 875
+    },
+    {
+      "damage_flag": 5,
+      "name_text": "interaction:text_automatic_pilot",
+      "charge": 350
+    },
+    {
+      "damage_flag": 6,
+      "name_text": "interaction:text_radar_mapper",
+      "charge": 250
+    },
+    {
+      "damage_flag": 7,
+      "name_text": "interaction:text_naval_e_c_m_system",
+      "charge": 3750
+    },
+    {
+      "damage_flag": 8,
+      "name_text": "interaction:text_hyperspace_cloud_analyser",
+      "charge": 437
+    },
+    {
+      "damage_flag": 9,
+      "name_text": "interaction:text_fighter_launch_device",
+      "charge": -3036
+    },
+    {
+      "damage_flag": 10,
+      "name_text": "interaction:text_energy_bomb",
+      "charge": 4750
+    },
+    {
+      "damage_flag": 11,
+      "name_text": "interaction:text_escape_capsule",
+      "charge": 5000
+    },
+    {
+      "damage_flag": 12,
+      "name_text": "interaction:text_energy_booster_unit",
+      "charge": 2750
+    },
+    {
+      "damage_flag": 13,
+      "name_text": "interaction:text_cargo_scoop_conversion",
+      "charge": 1000
+    },
+    {
+      "damage_flag": 14,
+      "name_text": "interaction:text_atmospheric_shielding",
+      "charge": 50
+    },
+    {
+      "damage_flag": 15,
+      "name_text": "interaction:text_hull_auto_repair_system",
+      "charge": 4375
+    },
+    {
+      "damage_flag": 16,
+      "name_text": "interaction:text_laser_cooling_booster",
+      "charge": 100
+    },
+    {
+      "damage_flag": 17,
+      "name_text": "interaction:text_auto_refueller",
+      "charge": 25
+    }
+  ]
+}

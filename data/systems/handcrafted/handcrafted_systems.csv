@@ -1,0 +1,12 @@
+sector_x,sector_y,number,template
+0,0,0,sol
+0,0,1,alpha_centauri
+-2,-1,3,wolf_630
+-1,1,0,sixty_one_cygni
+1,0,0,sirius
+0,2,1,eta_cassiopeia
+-1,0,1,ross_154
+-3,-6,0,lave
+-3,-6,1,diso
+-3,-6,3,leesti
+-2,-6,0,zaonce

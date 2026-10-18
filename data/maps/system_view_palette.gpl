@@ -1,0 +1,132 @@
+GIMP Palette
+Name: system_view_palette
+Columns: 16
+# RGB8 display values; the build quantizes to VGA RGB6.
+  0   8 255  color_000
+  8  32 255  color_001
+ 12  49 255  color_002
+ 20  73 255  color_003
+ 32  97 255  color_004
+ 45 113 255  color_005
+ 49 130 255  color_006
+ 61 154 255  color_007
+ 65 170 255  color_008
+ 77 190 255  color_009
+ 89 198 255  color_010
+ 97 219 255  color_011
+105 235 255  color_012
+113 247 255  color_013
+125 255 255  color_014
+138 255 255  color_015
+ 65   0  57  color_016
+ 85   0  73  color_017
+105   0  89  color_018
+125   0 113  color_019
+142   0 130  color_020
+166   0 154  color_021
+182   0 178  color_022
+206   0 206  color_023
+219   0 223  color_024
+235   0 247  color_025
+247   0 255  color_026
+255   0 255  color_027
+255  24 255  color_028
+255  57 255  color_029
+255  89 255  color_030
+255 121 255  color_031
+ 49   8   0  color_032
+ 69  12   0  color_033
+ 93  24   0  color_034
+117  32   4  color_035
+138  45   4  color_036
+162  53   8  color_037
+186  69  12  color_038
+206  81  16  color_039
+231  97  24  color_040
+255 113  32  color_041
+255 138  40  color_042
+255 158  53  color_043
+255 182  65  color_044
+255 198  73  color_045
+255 219  85  color_046
+255 235  97  color_047
+105   0   0  color_048
+125   0   0  color_049
+142   0   0  color_050
+158   0   0  color_051
+178   0   0  color_052
+194   0   0  color_053
+210   0   0  color_054
+231   0   0  color_055
+247   0   0  color_056
+255   0   0  color_057
+255  12   8  color_058
+255  28  24  color_059
+255  49  36  color_060
+255  65  53  color_061
+255  81  65  color_062
+255  97  81  color_063
+142  73  45  color_064
+154  85  45  color_065
+170  97  49  color_066
+182 105  57  color_067
+198 125  61  color_068
+219 138  65  color_069
+231 154  65  color_070
+247 170  73  color_071
+247 182  81  color_072
+247 194  89  color_073
+247 206 101  color_074
+251 219 109  color_075
+251 231 121  color_076
+251 239 130  color_077
+251 247 138  color_078
+255 255 150  color_079
+  0   0 101  color_080
+  4   8 109  color_081
+  8  24 121  color_082
+ 16  40 130  color_083
+ 24  57 142  color_084
+ 36  73 150  color_085
+ 49  93 162  color_086
+ 61 113 170  color_087
+ 77 134 182  color_088
+ 89 150 190  color_089
+105 170 202  color_090
+125 190 210  color_091
+142 206 223  color_092
+162 223 235  color_093
+182 239 243  color_094
+206 255 255  color_095
+ 45  65  32  color_096
+ 49  85  36  color_097
+ 61 101  45  color_098
+ 73 117  57  color_099
+ 85 138  61  color_100
+ 89 154  73  color_101
+101 170  77  color_102
+105 190  85  color_103
+117 206  97  color_104
+125 223 101  color_105
+130 243 105  color_106
+142 255 113  color_107
+150 255 117  color_108
+154 255 130  color_109
+158 255 138  color_110
+166 255 154  color_111
+ 85  85  85  color_112
+101 101 101  color_113
+117 117 117  color_114
+138 138 138  color_115
+158 158 158  color_116
+178 178 178  color_117
+194 194 194  color_118
+210 210 210  color_119
+215 215 215  color_120
+219 219 219  color_121
+227 227 227  color_122
+231 231 231  color_123
+235 235 235  color_124
+243 243 243  color_125
+247 247 247  color_126
+255 255 255  color_127

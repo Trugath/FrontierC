@@ -1,0 +1,4 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x0bebc201,0xc0f535f7,frontier,44,main_model_160,0,0,0,0,5000,Riedquat,0,0,0
+0x00000257,0x012c1835,Riedquat,20,main_model_138,0x002275fb,0,38,0,29,Waterloo,1,1,0x1555
+0x00000001,0x7078f4b5,Waterloo,66,main_model_086,0x00000274,0x5555,0,0xb1c7,15,La Soeur du Dan Ham,11,2,0

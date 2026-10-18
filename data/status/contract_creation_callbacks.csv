@@ -1,0 +1,17 @@
+subtype,threshold,callback
+0,0x0000,
+1,0x0000,
+2,0x0000,
+3,0x0000,
+4,0x0000,
+5,0x0000,
+6,0x0000,
+7,0x5553,create_contract_related_object
+8,0x71c4,create_contract_related_object
+9,0x0000,
+10,0x8e35,create_contract_mode_four_object
+11,0xaaa6,create_contract_related_object
+12,0xc717,create_contract_related_object
+13,0xfff9,create_two_contract_objects
+14,0xfff9,create_contract_related_object
+15,0xfff9,create_three_contract_objects

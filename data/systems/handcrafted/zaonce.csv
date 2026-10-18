@@ -1,0 +1,4 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x01312d01,0xfe7512b1,frontier,46,main_model_162,0,0,0,0,5000,Zaonce,0,0,0
+0x00000257,0x012c1835,Zaonce,6,main_model_126,0x0017c79b,0,38,0,16,Industry,1,1,0x1555
+0x00000001,0x0582df75,Industry,64,main_model_084,0x00000274,0x5555,0,0xb1c7,15,Ridley Scott,12,2,0

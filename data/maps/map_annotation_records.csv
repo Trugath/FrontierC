@@ -1,0 +1,15 @@
+threshold,sector_x,sector_y,label
+40,-2584,1756,major_arm
+40,744,-1316,perseus_arm
+40,59112,-2084,intermediate_arm
+40,-1816,-4132,norma_arm
+16,0,0,sol
+7,0,76,polaris
+6,92,6,rigel
+4,-146,85,beta_lyrae
+4,32,32,pleiades
+3,-39,-34,antares
+1,-72,38,dumbell_nebula
+1,-6,-40,hadar
+1,59,14,betelgeuse
+1,-4,-17,spica

@@ -1,0 +1,9 @@
+# Root body named Frontier. Top-level system records hang from this object.
+orientation = near_unit, 0, 0, 0, near_unit, 0, 0, 0, near_unit
+rebuild_budget = 0x3c
+model = main_model_160
+screen_x = 0x8000
+screen_y = 0x8000
+cargo_type = 0xffff
+target_seed = 0x789a3456
+name = Frontier

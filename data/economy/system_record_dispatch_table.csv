@@ -1,0 +1,17 @@
+slot,handler
+0,generate_request_variant_8
+1,generate_request_variant_8
+2,generate_request_variant_8
+3,generate_request_variant_8
+4,generate_request_variant_8
+5,generate_request_variant_8
+6,generate_request_variant_8
+7,generate_request_variant_8
+8,generate_request_variant_4
+9,generate_request_variant_4
+10,generate_request_variant_4_with_threshold
+11,generate_request_variant_4_with_threshold
+12,generate_assassinate_request
+13,generate_assassinate_request
+14,generate_photograph_request
+15,generate_destroy_request

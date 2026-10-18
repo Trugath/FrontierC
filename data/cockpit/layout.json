@@ -1,0 +1,232 @@
+{
+  "$schema": "layout.schema.json",
+  "format": "frontier-cockpit-layout-v1",
+  "weapons": {
+    "dummy_mine": {
+      "even_slot_sprite": "dummy_mine",
+      "odd_slot_sprite": "dummy_mine"
+    },
+    "proximity_mine": {
+      "even_slot_sprite": "proximity_mine",
+      "odd_slot_sprite": "proximity_mine"
+    },
+    "homing_missile": {
+      "even_slot_sprite": "homing_missile_even",
+      "odd_slot_sprite": "homing_missile_odd"
+    },
+    "smart_missile": {
+      "even_slot_sprite": "smart_missile_even",
+      "odd_slot_sprite": "smart_missile_odd"
+    },
+    "naval_missile": {
+      "even_slot_sprite": "naval_missile_even",
+      "odd_slot_sprite": "naval_missile_odd"
+    },
+    "nuclear_missile": {
+      "even_slot_sprite": "nuclear_missile_even",
+      "odd_slot_sprite": "nuclear_missile_odd"
+    }
+  },
+  "equipment_slots": [
+    [
+      226,
+      178
+    ],
+    [
+      94,
+      178
+    ],
+    [
+      212,
+      178
+    ],
+    [
+      108,
+      178
+    ],
+    [
+      246,
+      192
+    ],
+    [
+      74,
+      192
+    ],
+    [
+      232,
+      192
+    ],
+    [
+      88,
+      192
+    ]
+  ],
+  "commands": {
+    "activate_selected": {
+      "key": "m",
+      "bounds": [
+        144,
+        188,
+        176,
+        200
+      ]
+    },
+    "activate_ecm": {
+      "key": "e",
+      "bounds": [
+        128,
+        188,
+        144,
+        200
+      ]
+    },
+    "escape_capsule": {
+      "key": "x",
+      "bounds": [
+        112,
+        188,
+        128,
+        200
+      ]
+    },
+    "energy_bomb": {
+      "key": "b",
+      "bounds": [
+        208,
+        188,
+        224,
+        200
+      ]
+    },
+    "toggle_cloud_analysis": {
+      "key": "/",
+      "bounds": [
+        96,
+        188,
+        112,
+        200
+      ]
+    },
+    "toggle_target_stats": {
+      "key": "r",
+      "bounds": [
+        176,
+        188,
+        192,
+        200
+      ]
+    },
+    "ship_command": {
+      "key": "d",
+      "bounds": [
+        192,
+        188,
+        208,
+        200
+      ]
+    }
+  },
+  "target_marker": [
+    {
+      "from": [
+        -14,
+        -14
+      ],
+      "to": [
+        -9,
+        -9
+      ]
+    },
+    {
+      "from": [
+        14,
+        14
+      ],
+      "to": [
+        9,
+        9
+      ]
+    },
+    {
+      "from": [
+        14,
+        -14
+      ],
+      "to": [
+        9,
+        -9
+      ]
+    },
+    {
+      "from": [
+        -14,
+        14
+      ],
+      "to": [
+        -9,
+        9
+      ]
+    }
+  ],
+  "target_labels": {
+    "unprojected": {
+      "text": "flight:target_behind_km",
+      "position": [
+        140,
+        64
+      ]
+    },
+    "upper_left": {
+      "text": "flight:target_marker_a_km",
+      "position": [
+        110,
+        60
+      ]
+    },
+    "upper_right": {
+      "text": "flight:target_marker_b_km",
+      "position": [
+        180,
+        60
+      ]
+    },
+    "lower_left": {
+      "text": "flight:target_marker_c_km",
+      "position": [
+        110,
+        103
+      ]
+    },
+    "lower_right": {
+      "text": "flight:target_marker_d_km",
+      "position": [
+        180,
+        103
+      ]
+    },
+    "unprojected_other": {
+      "text": "flight:target_out_of_range_km",
+      "position": [
+        120,
+        64
+      ]
+    }
+  },
+  "drive_labels": {
+    "none": "status:text_074_none",
+    "class_1": "interaction:text_interplanetary_drive",
+    "class_2": "interaction:text_class_1_hyperdrive",
+    "class_3": "interaction:text_class_2_hyperdrive",
+    "class_4": "interaction:text_class_3_hyperdrive",
+    "class_5": "interaction:text_class_4_hyperdrive",
+    "class_6": "interaction:text_class_5_hyperdrive",
+    "class_7": "interaction:text_class_6_hyperdrive",
+    "class_8": "interaction:text_class_7_hyperdrive",
+    "class_9": "status:text_012_class_8_hyperdrive",
+    "military_class_1": "interaction:text_class_1_military_drive",
+    "military_class_2": "interaction:text_class_2_military_drive",
+    "military_class_3": "interaction:text_class_3_military_drive",
+    "military_class_4": "status:text_013_class_4_military_drive",
+    "interplanetary": "flight:mode_unknown"
+  }
+}

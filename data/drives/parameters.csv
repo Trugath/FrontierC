@@ -1,0 +1,16 @@
+capacity,threshold,name_text
+0,0,status:text_074_none
+0,4,interaction:text_interplanetary_drive
+20000,6,interaction:text_class_1_hyperdrive
+80000,12,interaction:text_class_2_hyperdrive
+180000,24,interaction:text_class_3_hyperdrive
+320000,80,interaction:text_class_4_hyperdrive
+500000,150,interaction:text_class_5_hyperdrive
+720000,250,interaction:text_class_6_hyperdrive
+980000,400,interaction:text_class_7_hyperdrive
+1620000,600,status:text_012_class_8_hyperdrive
+20000,6,interaction:text_class_1_military_drive
+80000,12,interaction:text_class_2_military_drive
+180000,24,interaction:text_class_3_military_drive
+320000,42,status:text_013_class_4_military_drive
+1620000,0,flight:mode_unknown

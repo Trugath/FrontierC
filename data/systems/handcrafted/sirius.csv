@@ -1,0 +1,7 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x27384881,0xf3e91241,frontier,root,main_model_032,0,0,0,0,0,"Sirius, Sirius B",0,0,0
+0x1b898f81,0xa9cebc44,"Sirius, Sirius B",48,main_model_164,0x02b01fd6,0,0,0,9000,Sirius,2,1,0
+0x0baeb901,0x11422750,"Sirius, Sirius B",50,main_model_174,0x02b01fd6,0x8000,0,0,11000,Sirius B,13,1,0
+0x00000024,0x7ebb5a22,Sirius B,10,main_model_130,0x000366c9,0,14,0x1bbb,154,Lucifer,5,2,0x5555
+0xfff60000,0x5a2851e9,Lucifer,verbatim,main_model_108,0,0xaaab,0,0,20,Factory Central,0,3,0
+0x00033451,0xb4e3bc84,"Sirius, Sirius B",30,main_model_146,0x5d0291aa,0,283,0x1740,-250,Waypoint,0,1,0x438e

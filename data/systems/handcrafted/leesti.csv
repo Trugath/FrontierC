@@ -1,0 +1,4 @@
+size,seed,parent,kind,descriptor,scalar,orbit_longitude,orbit_eccentricity,orbit_inclination,temperature_c,name,orbit_shift,generation,basis_seed
+0x01312d01,0xb4a20ea2,frontier,40,main_model_154,0,0,0,0,5000,Leesti,0,0,0
+0x00000257,0x012c1835,Leesti,6,main_model_126,0x0017c79b,0,38,0,16,Leesti 1,1,1,0x1555
+0x00000001,0x83e39900,Leesti 1,64,main_model_084,0x00000274,0x5555,0,0xb1c7,15,George Lucas,12,2,0
