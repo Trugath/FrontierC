@@ -24,6 +24,7 @@ static void load(fe2_session_objects *b)
     fe2_session *s = b->session;
     b->state.random[0] = s->noise[0]; b->state.random[1] = s->noise[1];
     b->state.time_step = s->time_step;
+    b->state.simulation_step = s->simulation_step;
     b->state.selected_overlay = (uint16_t)s->selected_overlay;
     b->state.free_capacity = s->pools.player_capacity;
 }

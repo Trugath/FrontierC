@@ -1123,6 +1123,12 @@ static uint8_t notify_panel(void *p, uint16_t overlay, uint16_t request)
         if (g->map.status) g->session->error = 1;
         return (uint8_t)changed;
     }
+    /* Flight's +0x24 is the same entry. AX=0 hides the cockpit; a panel
+     * notice is 1 or 0xffff and must not. */
+    if (overlay == 3) {
+        fe2_flight_change_view(&g->flight.state, &g->flight.services, request);
+        return 0;
+    }
     if (overlay < FE2_SESSION_OVERLAYS && g->session->overlays[overlay].deselect)
         g->session->overlays[overlay].deselect(g->session->overlays[overlay].context, g->session);
     return 0;

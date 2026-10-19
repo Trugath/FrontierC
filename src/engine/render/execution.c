@@ -605,10 +605,9 @@ static fe2_render_program_status parameter_control(fe2_render_execution_frame *f
     if (!(mode & 0x80u)) { d->inherited_material = value; f->transform.material = value; }
     else {
         if (value >> 16) {
-            uint32_t offset = value >> 12;
-            if (offset < 14 || offset - 14 >= fe2_render_material_bytes || fe2_render_material_bytes - (offset - 14) < 2)
-                return FE2_RENDER_PROGRAM_BAD_VALUE;
-            value = (uint16_t)((value & 0xfffu) + word(fe2_render_material_data + offset - 14));
+            uint16_t looked;
+            if (fe2_render_material_word(value >> 12, &looked)) return FE2_RENDER_PROGRAM_BAD_VALUE;
+            value = (uint16_t)((value & 0xfffu) + looked);
         }
         d->face_parameters[0] = (uint16_t)value;
     }

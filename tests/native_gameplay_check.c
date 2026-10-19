@@ -136,6 +136,25 @@ static void frame(void)
 }
 /* Pixels of the flight picture outside the comms list. The list is drawn
  * over that picture; a cleared view leaves only the menu glyphs. */
+/* Pixels of the 320x168 view that are not the cleared sky. A planet or
+ * station fills thousands; the crosshair alone does not. */
+static unsigned view_ink(void)
+{
+    fe2_video *v = fe2_render_runtime_video(game.host->runtime);
+    const uint8_t *page = v->pages[v->drawing];
+    unsigned n = 0, x, y;
+    for (y = 0; y < 168; ++y) for (x = 0; x < 320; ++x)
+        if (page[y * 320u + x] != 0x7f) ++n;
+    return n;
+}
+static void commit_offence(uint16_t offence)
+{
+    fe2_call_args args;
+    fe2_args_clear(&args);
+    fe2_args_object(&args, 9, game.objects.state.player_record);
+    assert(session.calls.offence_event);
+    session.calls.offence_event(session.calls.context[15], offence, &args);
+}
 static unsigned flight_picture(const uint8_t *page)
 {
     unsigned n = 0, x, y;
@@ -2007,6 +2026,36 @@ int main(int argc, char **argv)
         assert(game.station.state.ui_flags & 1u);
         printf("Icon clicks: map, status, flight phone\n");
         fe2_render_runtime_destroy(runtime); return 0;
+    }
+    if (argc > 2 && !strcmp(argv[2], "view")) {
+        unsigned ink_before, step;
+        /* A fine message notifies the selected panel. That notice is not
+         * "close the view": the cockpit must keep drawing the planet. */
+        ink_before = view_ink();
+        printf("Before offence: ink %u view %04x mode %02x\n", ink_before,
+            game.flight.state.view_mode, session.resident.flight_mode);
+        assert(ink_before > 10000);
+        commit_offence(1);
+        for (step = 0; step < 5; ++step) frame();
+        printf("Launch clearance: ink %u view %04x mode %02x fine %u msg %04x\n",
+            view_ink(), game.flight.state.view_mode, session.resident.flight_mode,
+            session.resident.local_offence_fine, game.station.state.message.text);
+        assert(session.resident.local_offence_fine > 0);
+        assert((int8_t)game.flight.state.view_mode < 0);
+        assert(view_ink() > 10000);
+        if (session.resident.flight_mode == FE2_FLIGHT_DOCKED) {
+            fe2_gameplay_key(&game, 0x41, 0, 0);
+            frame();
+            fe2_gameplay_key(&game, 0x41, 0, 1);
+            for (step = 0; step < 10; ++step) frame();
+            printf("Left without permission: ink %u view %04x mode %02x\n",
+                view_ink(), game.flight.state.view_mode, session.resident.flight_mode);
+            assert(session.resident.flight_mode != FE2_FLIGHT_DOCKED);
+            assert((int8_t)game.flight.state.view_mode < 0);
+            assert(view_ink() > 10000);
+        }
+        fe2_render_runtime_destroy(runtime);
+        return 0;
     }
     if (selection != 1) {
         assert(!session.error && game.bodies > 0);

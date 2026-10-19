@@ -276,7 +276,7 @@ fe2_render_program_result fe2_render_runtime_submit(fe2_render_runtime *r, uint1
     borrow_noise(r);
     result = fe2_render_execute_model(&r->execution, descriptor, transform, variables, scales, NULL, 0, &r->drawing, 65536);
     return_noise(r);
-    if (result.status != FE2_RENDER_PROGRAM_COMPLETE) r->error = 1;
+    /* A program that stops has queued what it completed. The frame continues. */
     return result;
 }
 fe2_render_program_result fe2_render_runtime_submit_alternate(fe2_render_runtime *r, uint16_t selector,
@@ -292,7 +292,6 @@ fe2_render_program_result fe2_render_runtime_submit_alternate(fe2_render_runtime
     result = fe2_render_execute_model(&r->execution, descriptor, transform, variables, scales,
         context, vertex_count, &r->drawing, 65536);
     return_noise(r);
-    if (result.status != FE2_RENDER_PROGRAM_COMPLETE) r->error = 1;
     return result;
 }
 static void queued_round(void *target, const void *payload)

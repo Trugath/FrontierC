@@ -53,6 +53,7 @@ typedef struct fe2_objects_state {
     int16_t equipment_threshold;
     int16_t drive_threshold;
     uint32_t time_step;
+    uint32_t simulation_step;    /* DS:0x56e7: this frame's captured simulation */
     const fe2_object *player_record;
     uint16_t data_segment;       /* the loaded data segment: the relocated word at
                                   * equipment kind 0x16's strength */

@@ -41,9 +41,13 @@ typedef struct fe2_render_drawing_target {
     void (*texture)(void *context, const struct fe2_render_texture_command *command);
 } fe2_render_drawing_target;
 
+/* Word at main_texture_materials-14+index. The original has no range test:
+ * index 0x3f0 is image 0x29b6, the encoding of `mov bx, ax`. */
+int fe2_render_material_word(uint32_t index, uint16_t *out);
+
 /* Resolve the line producer's packed material selector against the immutable
  * native material resource. Word additions wrap independently before the
- * inherited dword addition. Invalid table accesses return -1 unchanged. */
+ * inherited dword addition. A missing table word returns -1 unchanged. */
 int fe2_render_line_material(uint16_t token, uint16_t face_base, uint32_t inherited, uint16_t *out);
 
 /* Native line-command producer, after vertex resolution.

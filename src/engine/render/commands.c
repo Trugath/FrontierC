@@ -10,6 +10,23 @@ static uint32_t add_word(uint32_t value, uint16_t addend)
     return (value & UINT32_C(0xffff0000)) | (uint16_t)((uint16_t)value + (unsigned)addend);
 }
 
+int fe2_render_material_word(uint32_t index, uint16_t *out)
+{
+    if (!out || index < 14u) return -1;
+    index -= 14u;
+    if (index < fe2_render_material_bytes && fe2_render_material_bytes - index >= 2u) {
+        *out = (uint16_t)((unsigned)fe2_render_material_data[index] |
+                          (unsigned)fe2_render_material_data[index + 1] << 8);
+        return 0;
+    }
+    /* Past the 592-byte table. Index 0x3f0 addresses image 0x29b6. */
+    if (index == 994u) {
+        *out = 0xd88bu;
+        return 0;
+    }
+    return -1;
+}
+
 int fe2_render_line_material(uint16_t token, uint16_t base, uint32_t inherited, uint16_t *out)
 {
     uint32_t value = token >> 4;
@@ -24,13 +41,8 @@ int fe2_render_line_material(uint16_t token, uint16_t base, uint32_t inherited, 
     if (!no_base) value = add_word(value, base);
     if (add_inherited) value += inherited;
     if (value & UINT32_C(0xffff0000)) {
-        uint32_t offset = value >> 12;
         uint16_t word;
-        if (offset < 14u) return -1;
-        offset -= 14u;
-        if (offset >= fe2_render_material_bytes || fe2_render_material_bytes - offset < 2) return -1;
-        word = (uint16_t)((unsigned)fe2_render_material_data[offset] |
-                         (unsigned)fe2_render_material_data[offset + 1] << 8);
+        if (fe2_render_material_word(value >> 12, &word)) return -1;
         value = (uint16_t)((value & 0xfffu) + word);
     }
     *out = (uint16_t)value;

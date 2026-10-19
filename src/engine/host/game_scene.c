@@ -160,13 +160,14 @@ static int submit_record(fe2_gameplay *g, fe2_object *camera, fe2_object *o, int
 typedef struct scene_pass {
     fe2_gameplay *game;
     fe2_object *camera;
-    int error;
 } scene_pass;
 
+/* A model that stops is omitted. Later records are still visited, so the
+ * planet behind a beam is still drawn. */
 static void scene_record(void *context, fe2_object *record)
 {
     scene_pass *pass = context;
-    if (!pass->error) pass->error = submit_record(pass->game, pass->camera, record, 1);
+    (void)submit_record(pass->game, pass->camera, record, 1);
 }
 static uint32_t scene_random(void *context)
 {
@@ -190,7 +191,7 @@ static void scene_attachment(void *context, fe2_object *o)
     fe2_object placed;
     fe2_render_attachment_state state;
     size_t offset = 0;
-    if ((o->model & 1u) || o->model / 2 >= 240) { pass->error = -1; return; }
+    if ((o->model & 1u) || o->model / 2 >= 240) return;
     bank = g->host->resources->models[0][o->model / 2];
     if (g->host->resources->model_banks[0].data) {
         bank = g->host->resources->model_banks[0];
@@ -199,16 +200,16 @@ static void scene_attachment(void *context, fe2_object *o)
     state.angle[0] = (uint16_t)g->flight.state.turret_angle[0];
     state.angle[1] = (uint16_t)g->flight.state.turret_angle[1];
     state.size_high = (uint8_t)(o->size_mantissa >> 8);
-    if (!bank.data || fe2_render_place_attachment(o, o, bank, offset, &state, &placed)) { pass->error = -1; return; }
+    if (!bank.data || fe2_render_place_attachment(o, o, bank, offset, &state, &placed)) return;
     placed.render_state = 0;
-    if (!pass->error) pass->error = submit_record(g, pass->camera, &placed, 0);
+    (void)submit_record(g, pass->camera, &placed, 0);
 }
 
 int fe2_gameplay_render_scene(fe2_gameplay *g, fe2_object *camera)
 {
     fe2_session *s = g->session;
     int64_t absolute[3];
-    scene_pass pass = {g, camera, 0};
+    scene_pass pass = {g, camera};
     fe2_reference_services services = {&pass, scene_record, scene_attachment, scene_random, scene_model};
     g->position.current = g->position.saved = &s->objects;
     g->position.generation = s->generation;
@@ -223,7 +224,7 @@ int fe2_gameplay_render_scene(fe2_gameplay *g, fe2_object *camera)
     s->resident.classification_0 = g->reference.parameters[0]; s->resident.classification_1 = g->reference.parameters[1];
     s->resident.classification_2 = g->reference.parameters[2]; s->resident.classification_3 = g->reference.parameters[3];
     if (fe2_render_runtime_atmosphere(g->host->runtime)) g->flight.state.scene_flash = 0xffff;
-    return pass.error;
+    return 0;
 }
 
 /* Navigation resolves every parent in its own pool. Keep flight's cached
@@ -234,7 +235,7 @@ int fe2_gameplay_render_navigation(fe2_gameplay *g, fe2_object *camera, fe2_obje
     fe2_reference reference = g->reference;
     int64_t absolute[3];
     int result = 0;
-    scene_pass pass = {g, camera, 0};
+    scene_pass pass = {g, camera};
     fe2_reference_services services = {&pass, scene_record, scene_attachment, scene_random, scene_model};
     g->position.current = g->position.saved = &g->session->map_objects;
     g->position.generation = g->session->generation;
@@ -248,7 +249,6 @@ int fe2_gameplay_render_navigation(fe2_gameplay *g, fe2_object *camera, fe2_obje
     } else {
         ++g->navigation_scenes;
         fe2_reference_refresh(&g->reference, &services, camera);
-        result = pass.error;
     }
     g->position = position; g->reference = reference;
     return result;

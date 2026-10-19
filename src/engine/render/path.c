@@ -58,12 +58,9 @@ fe2_screen_point fe2_path_near(const fe2_render_program_drawing *d, int behind, 
 int fe2_path_bank(uint32_t value, uint16_t *out)
 {
     if (value & UINT32_C(0xffff0000)) {
-        uint32_t offset = value >> 12;
-        if (offset < 14u) return -1;
-        offset -= 14u;
-        if (offset >= fe2_render_material_bytes || fe2_render_material_bytes - offset < 2) return -1;
-        value = (uint16_t)((value & 0xfffu) + ((unsigned)fe2_render_material_data[offset] |
-                                               (unsigned)fe2_render_material_data[offset + 1] << 8));
+        uint16_t word;
+        if (fe2_render_material_word(value >> 12, &word)) return -1;
+        value = (uint16_t)((value & 0xfffu) + word);
     }
     *out = (uint16_t)value;
     return 0;

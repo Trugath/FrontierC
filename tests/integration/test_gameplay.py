@@ -64,7 +64,13 @@ class NativeGameplay(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         print(result.stdout, end='')
 
-    def test_firing_starting_weapon(self):
+    def test_offence_keeps_the_view(self):
+        result = subprocess.run([str(self.check), '0x101', 'view'], text=True,
+                                capture_output=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('Launch clearance:', result.stdout)
+        self.assertIn('Left without permission:', result.stdout)
+        print(result.stdout, end='')
         result = subprocess.run([str(self.check), '1', 'fire'], text=True, capture_output=True, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('beams', result.stdout)

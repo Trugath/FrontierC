@@ -9,13 +9,13 @@
 
 enum { CODE_MINING_LASER = 0x9a, MODEL_ASTEROID = 0x7c, BEAM_KINDS = 8 };
 
-/* the shot's cost and damage from the probe distance. Beam kinds
- * (code bits 3..6 below 8) add eight times their strength to the busy time
- * and set the cooldown (0x795c, 0xffff for kind 6); their damage is the
- * strength scaled by distance / cooldown. Other kinds scale by distance / 128
- * (saturating) and add the product shifted by their CS:0x69 count. Fuel is
- * consumed for sixteen times the damage. */
-static uint16_t shot(fe2_objects_state *s, const fe2_objects_services *v, fe2_object *o, uint32_t distance)
+/* Cost and damage use this frame's simulation step (DS:0x56e7). Beam kinds
+ * (code bits 3..6 below 8) add eight times their
+ * strength to the busy time and set the cooldown (0x795c, 0xffff for kind 6);
+ * their damage is the strength scaled by step / cooldown. Other kinds scale
+ * by step / 128 (saturating) and add the product shifted by their CS:0x69
+ * count. Fuel is consumed for sixteen times the damage. */
+static uint16_t shot(fe2_objects_state *s, const fe2_objects_services *v, fe2_object *o, uint32_t step)
 {
     unsigned kind = (s->equipment_code & 0x78u) >> 2;
     uint16_t strength = 0x7b + kind == 0x91 ? s->data_segment : fe2_objects_preamble_word(0x7b + kind);
@@ -26,17 +26,17 @@ static uint16_t shot(fe2_objects_state *s, const fe2_objects_services *v, fe2_ob
         o->busy_remaining = (uint16_t)(o->busy_remaining + (uint16_t)(strength << 3));
         o->cooldown = cooldown;
         value = (uint32_t)(int32_t)(int16_t)strength;
-        if (distance >= cooldown) {
+        if (step >= cooldown) {
             /* A quotient beyond a word resumes with AX unchanged. */
-            uint32_t q = distance / cooldown;
-            uint16_t word = q > 0xffffu ? (uint16_t)distance : (uint16_t)q;
+            uint32_t q = step / cooldown;
+            uint16_t word = q > 0xffffu ? (uint16_t)step : (uint16_t)q;
             value = (uint32_t)word * strength;
         }
     } else {
         uint32_t product, busy;
         uint16_t count = fe2_objects_preamble_word(0x69 + kind);
         v->sound(v->context, 0xb, o->level);
-        product = (uint32_t)strength * (uint16_t)(distance >> 7);
+        product = (uint32_t)strength * (uint16_t)(step >> 7);
         if (product > 0xffffu) product = 0xffff;
         busy = (product << 3) >> (count > 31 ? 31 : count);
         if (count > 31) busy = 0;
@@ -100,7 +100,7 @@ void fe2_objects_activate(fe2_objects_state *s, const fe2_objects_services *v, f
     probe.hit = 0; probe.target = 0; probe.reach = 0; probe.distance = 0; probe.range = UINT32_C(0x7fffff);
     for (i = 0; i < 6; ++i) probe.position[i] = 0;
     v->probe(v->context, o, &probe);
-    if (!probe.hit) { (void)shot(s, v, o, probe.distance); return; }
+    if (!probe.hit) { (void)shot(s, v, o, s->simulation_step); return; }
     o->stored_model = (uint16_t)(probe.reach >> 7);
     {
         fe2_object *victim = probe.target;
@@ -123,7 +123,7 @@ void fe2_objects_activate(fe2_objects_state *s, const fe2_objects_services *v, f
             victim = last;
             attacker = (uint16_t)(0xff00u | o->handle);
         } else attacker = (uint16_t)((probe.range & 0xff00u) | o->handle);
-        damage = shot(s, v, o, probe.distance);
+        damage = shot(s, v, o, s->simulation_step);
         if (victim) (void)fe2_objects_damage(s, v, victim, damage, attacker);
         fe2_objects_spawn_effect(s, v, o, probe.position, 1);
     }
