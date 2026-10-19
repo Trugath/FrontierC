@@ -99,12 +99,14 @@ VERSIONS = {
     'jupalt.rol': '244567d4dae0747b3137fada92b9149152a3332604e67cdb4a4ccfa1d4eec62a',
     'valkries.rol': '99a93721a0e2d9798d91444d625b9cb4138c1d7c5a83c2ec3809bb5242dad44f',
 }
-AUTHORED = (
-    'models/frontier/models.ini', 'models/frontier/model_directory.tsv', 'models/frontier/ship_parameters.csv',
-    'models/frontier_auxiliary/models.ini', 'models/frontier_auxiliary/model_directory.tsv',
-    'intro/models.ini', 'intro/model_directory.tsv', 'intro/objects.ini', 'graphics/el2g.ini', 'palettes/composites.ini',
-    'adlib/bank.ini', 'galaxy/tables.ini',
-    'main/frontier/greeting_one.txt', 'main/frontier/greeting_two.txt', 'main/frontier/glyph_widths.csv',
+# Decoded from the install. These must not be copied from the repository seed.
+_EXTRACTED = (
+    'graphics/sprites/', 'graphics/compression/',
+    'models/frontier/models/', 'models/frontier/geometry/',
+    'models/frontier/contacts/', 'models/frontier/contact_offsets/',
+    'models/frontier_auxiliary/models/',
+    'intro/models/', 'intro/geometry/', 'intro/objects/',
+    'music/', 'roland/effects/',
 )
 
 MCGA_START = 0x5d4b
@@ -168,16 +170,26 @@ def check_install(files):
 
 
 def authored_files():
-    """Project files the packer reads and the original binaries do not contain."""
-    paths = [DATA / relative for relative in AUTHORED]
+    """Project files the packer reads and the original binaries do not contain.
+
+    Gameplay tables, indexes, and catalogs live in this repository. A repack
+    into an empty directory has to carry them, or the dat cannot be built.
+    Strings, sprites, models, music, and the other decoded outputs stay out
+    of the seed because unpack writes those from the install.
+    """
     extracted = {DATA / 'text' / module / 'strings.tsv' for module, _filename in PROSE}
-    for directory, suffixes in (('composites', {'.csv', '.ini'}), ('text', {'.ini', '.tsv', '.txt'})):
-        for path in sorted((DATA / directory).rglob('*')):
-            if path in extracted or not path.is_file() or path.suffix not in suffixes:
-                continue
-            if path.suffix == '.txt' and path.name != 'identifiers.txt':
-                continue
-            paths.append(path)
+    extracted.update(DATA / name for name in (
+        'adlib/patches.csv', 'adlib/pitch_curves.csv', 'adlib/records.tsv',
+        'galaxy/density.pgm', 'setup/messages.json', 'video/font.bdf',
+        'video/default.gpl', 'palettes/composites.gpl'))
+    paths = []
+    for path in sorted(DATA.rglob('*')):
+        if not path.is_file() or path.suffix == '.md' or path in extracted:
+            continue
+        relative = path.relative_to(DATA).as_posix()
+        if any(relative.startswith(prefix) for prefix in _EXTRACTED):
+            continue
+        paths.append(path)
     return paths
 
 

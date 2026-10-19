@@ -27,8 +27,9 @@
 #define FE2_NATIVE_GAME 0
 #endif
 
-enum { FRAME_W = 320, FRAME_H = 200, FRAME_PIXELS = 64000, SCALE = 3,
-       VIEW_W = FRAME_W * SCALE, VIEW_H = FRAME_H * SCALE, STEP_US = 20000 };
+enum { FRAME_W = 320, FRAME_H = 200, FRAME_PIXELS = 64000, DEFAULT_SCALE = 3,
+       VIEW_W = FRAME_W * DEFAULT_SCALE, VIEW_H = FRAME_H * DEFAULT_SCALE, STEP_US = 20000,
+       MAX_SCALE = 16 };
 
 typedef struct intro_app {
     fe2_game_host host;
@@ -39,7 +40,14 @@ typedef struct intro_app {
     fe2_intro_audio audio;
     fe2_gameplay game;
     uint32_t pixels[FRAME_PIXELS];
-    uint32_t view[VIEW_W * VIEW_H];
+#ifndef _WIN32
+    uint32_t *view;
+    unsigned client_w, client_h, scale;
+    int origin_x, origin_y;
+    unsigned snap_w, snap_h;
+    unsigned mouse_buttons;
+    int clear_bars;
+#endif
     unsigned frames, ink;
     uint32_t intro_time;
     int errors, running, started, game_mode, no_autostart;
@@ -136,19 +144,94 @@ static void restore_input(void *context, uint16_t code)
     else enqueue(code);
 }
 
+#ifndef _WIN32
+/* Largest integer multiple of 320x200 that fits. The picture stays 8:5. */
+static unsigned fit_scale(unsigned width, unsigned height)
+{
+    unsigned sx = width / FRAME_W, sy = height / FRAME_H;
+    unsigned scale = sx < sy ? sx : sy;
+    if (scale < 1) scale = 1;
+    if (scale > MAX_SCALE) scale = MAX_SCALE;
+    return scale;
+}
+
+/* Nearest integer scale on the tighter axis, so a resize snaps to whole pixels. */
+static unsigned nearest_scale(unsigned width, unsigned height)
+{
+    int width_tighter = (unsigned long)width * FRAME_H <= (unsigned long)height * FRAME_W;
+    unsigned along = width_tighter ? width : height;
+    unsigned frame = width_tighter ? FRAME_W : FRAME_H;
+    unsigned scale = along / frame;
+    if (scale < MAX_SCALE && along - scale * frame >= frame / 2) ++scale;
+    if (scale < 1) scale = 1;
+    if (scale > MAX_SCALE) scale = MAX_SCALE;
+    return scale;
+}
+
+static void frame_geometry(unsigned width, unsigned height, unsigned *scale, int *origin_x, int *origin_y)
+{
+    unsigned fitted = fit_scale(width, height);
+    unsigned view_w = fitted * FRAME_W, view_h = fitted * FRAME_H;
+    *scale = fitted;
+    *origin_x = width > view_w ? (int)(width - view_w) / 2 : 0;
+    *origin_y = height > view_h ? (int)(height - view_h) / 2 : 0;
+}
+
+static int ensure_view(intro_app *a, unsigned scale)
+{
+    unsigned wide = scale * FRAME_W, high = scale * FRAME_H;
+    uint32_t *view;
+    XImage *image;
+    if (a->scale == scale && a->view && a->image) return 0;
+    view = (uint32_t *)malloc((size_t)wide * high * sizeof *view);
+    if (!view) return -1;
+    image = XCreateImage(a->display, DefaultVisual(a->display, DefaultScreen(a->display)), 24, ZPixmap, 0,
+        (char *)view, wide, high, 32, 0);
+    if (!image) { free(view); return -1; }
+    if (a->image) { a->image->data = NULL; XDestroyImage(a->image); }
+    free(a->view);
+    a->view = view;
+    a->image = image;
+    a->scale = scale;
+    a->clear_bars = 1;
+    return 0;
+}
+
+static int pointer_in_frame(const intro_app *a, int px, int py, unsigned *x, unsigned *y)
+{
+    int view_w, view_h, inside;
+    if (!a->scale) return 0;
+    view_w = (int)(a->scale * FRAME_W);
+    view_h = (int)(a->scale * FRAME_H);
+    inside = px >= a->origin_x && py >= a->origin_y &&
+        px < a->origin_x + view_w && py < a->origin_y + view_h;
+    if (px < a->origin_x) px = a->origin_x;
+    if (py < a->origin_y) py = a->origin_y;
+    if (px >= a->origin_x + view_w) px = a->origin_x + view_w - 1;
+    if (py >= a->origin_y + view_h) py = a->origin_y + view_h - 1;
+    *x = (unsigned)(px - a->origin_x) / a->scale;
+    *y = (unsigned)(py - a->origin_y) / a->scale;
+    return inside;
+}
+#endif
+
 static void paint(intro_app *a)
 {
 #ifdef _WIN32
     if (a->window) InvalidateRect(a->window, NULL, FALSE);
 #else
-    unsigned y, x;
-    for (y = 0; y < VIEW_H; ++y) {
-        unsigned sy = y / SCALE;
-        for (x = 0; x < VIEW_W; ++x)
-            a->view[y * VIEW_W + x] = a->pixels[sy * FRAME_W + x / SCALE];
+    unsigned y, x, wide, high;
+    if (!a->display || !a->view || !a->scale) return;
+    wide = a->scale * FRAME_W;
+    high = a->scale * FRAME_H;
+    for (y = 0; y < high; ++y) {
+        unsigned sy = y / a->scale;
+        uint32_t *row = a->view + (size_t)y * wide;
+        const uint32_t *source = a->pixels + sy * FRAME_W;
+        for (x = 0; x < wide; ++x) row[x] = source[x / a->scale];
     }
-    if (!a->display) return;
-    XPutImage(a->display, a->window, a->gc, a->image, 0, 0, 0, 0, VIEW_W, VIEW_H);
+    if (a->clear_bars) { XClearWindow(a->display, a->window); a->clear_bars = 0; }
+    XPutImage(a->display, a->window, a->gc, a->image, 0, 0, a->origin_x, a->origin_y, wide, high);
     XFlush(a->display);
 #endif
 }
@@ -309,6 +392,47 @@ static uint8_t x_scan(KeySym symbol, int *extended)
     default: return 0;
     }
 }
+static void apply_client_size(intro_app *a, unsigned width, unsigned height)
+{
+    unsigned fitted, target, target_w, target_h;
+    int origin_x, origin_y;
+    if (!width || !height || (width == a->client_w && height == a->client_h)) return;
+    target = nearest_scale(width, height);
+    target_w = target * FRAME_W;
+    target_h = target * FRAME_H;
+    /* Ask once for the snapped size. If the window manager keeps another size,
+     * the picture is letterboxed at the largest integer scale that fits. */
+    if ((width != target_w || height != target_h) && (a->snap_w != target_w || a->snap_h != target_h)) {
+        a->snap_w = target_w;
+        a->snap_h = target_h;
+        XResizeWindow(a->display, a->window, target_w, target_h);
+    }
+    frame_geometry(width, height, &fitted, &origin_x, &origin_y);
+    a->client_w = width;
+    a->client_h = height;
+    a->origin_x = origin_x;
+    a->origin_y = origin_y;
+    if (ensure_view(a, fitted)) return;
+    a->clear_bars = 1;
+}
+
+static void pointer_event(intro_app *a, int px, int py, int pressed, int released, unsigned button)
+{
+    unsigned x, y;
+    unsigned buttons = a->mouse_buttons;
+    if (pressed && button == 1) buttons |= 1u;
+    if (pressed && button == 3) buttons |= 2u;
+    if (released && button == 1) buttons &= ~1u;
+    if (released && button == 3) buttons &= ~2u;
+    a->mouse_buttons = buttons;
+    if (!a->scale) return;
+    if (a->game.active) {
+        pointer_in_frame(a, px, py, &x, &y);
+        fe2_gameplay_mouse(&a->game, x, y, buttons);
+    } else if (pressed && button == 1 && pointer_in_frame(a, px, py, &x, &y))
+        intro_menu_click(a, x, y);
+}
+
 static void pump_keys(intro_app *a)
 {
     while (a->display && XPending(a->display)) {
@@ -317,10 +441,23 @@ static void pump_keys(intro_app *a)
         KeySym sym;
         int length;
         XNextEvent(a->display, &event);
-        if (event.type == Expose) paint(a);
-        if (event.type == ButtonPress && event.xbutton.button == 1 && !a->game.active)
-            intro_menu_click(a, event.xbutton.x / SCALE, event.xbutton.y / SCALE);
-        if (event.type == FocusOut && a->game.active) { fe2_input_init(&a->session.input); continue; }
+        if (event.type == ConfigureNotify) {
+            apply_client_size(a, (unsigned)event.xconfigure.width, (unsigned)event.xconfigure.height);
+            paint(a);
+            continue;
+        }
+        if (event.type == Expose) { a->clear_bars = 1; paint(a); continue; }
+        if (event.type == MotionNotify)
+            pointer_event(a, event.xmotion.x, event.xmotion.y, 0, 0, 0);
+        if (event.type == ButtonPress || event.type == ButtonRelease)
+            pointer_event(a, event.xbutton.x, event.xbutton.y, event.type == ButtonPress,
+                event.type == ButtonRelease, event.xbutton.button);
+        if (event.type == FocusOut && a->game.active) {
+            a->mouse_buttons = 0;
+            a->game.mouse_buttons = 0;
+            fe2_input_init(&a->session.input);
+            continue;
+        }
         if (event.type != KeyPress && event.type != KeyRelease) continue;
         length = XLookupString(&event.xkey, text, (int)sizeof(text), &sym, NULL);
         if (a->game.active) {
@@ -333,23 +470,43 @@ static void pump_keys(intro_app *a)
     }
 }
 
+static void close_window(intro_app *a);
+
 static int open_window(intro_app *a)
 {
     XSetWindowAttributes attr;
+    XSizeHints hints;
     int screen;
     a->display = XOpenDisplay(NULL);
     if (!a->display) { fprintf(stderr, "No X11 display\n"); return -1; }
     screen = DefaultScreen(a->display);
     memset(&attr, 0, sizeof(attr));
     attr.background_pixel = BlackPixel(a->display, screen);
-    attr.event_mask = KeyPressMask | KeyReleaseMask | ButtonPressMask | FocusChangeMask | ExposureMask;
+    attr.event_mask = KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
+        PointerMotionMask | FocusChangeMask | ExposureMask | StructureNotifyMask;
+    a->client_w = VIEW_W;
+    a->client_h = VIEW_H;
     a->window = XCreateWindow(a->display, RootWindow(a->display, screen), 0, 0, VIEW_W, VIEW_H, 0,
         CopyFromParent, InputOutput, CopyFromParent, CWBackPixel | CWEventMask, &attr);
     XStoreName(a->display, a->window, "FE2 intro | 1-5 start, Esc menu, Alt+F4 quit");
+    memset(&hints, 0, sizeof hints);
+    hints.flags = PMinSize | PResizeInc | PAspect;
+    hints.min_width = FRAME_W;
+    hints.min_height = FRAME_H;
+    hints.width_inc = FRAME_W;
+    hints.height_inc = FRAME_H;
+    hints.min_aspect.x = 8;
+    hints.min_aspect.y = 5;
+    hints.max_aspect.x = 8;
+    hints.max_aspect.y = 5;
+    XSetWMNormalHints(a->display, a->window, &hints);
     a->gc = XCreateGC(a->display, a->window, 0, NULL);
-    a->image = XCreateImage(a->display, DefaultVisual(a->display, screen), 24, ZPixmap, 0,
-        (char *)a->view, VIEW_W, VIEW_H, 32, 0);
-    if (!a->image) { fprintf(stderr, "XCreateImage failed\n"); return -1; }
+    if (ensure_view(a, DEFAULT_SCALE)) {
+        fprintf(stderr, "XCreateImage failed\n");
+        close_window(a);
+        return -1;
+    }
+    frame_geometry(a->client_w, a->client_h, &a->scale, &a->origin_x, &a->origin_y);
     XMapWindow(a->display, a->window);
     XFlush(a->display);
     a->window_open = 1;
@@ -358,11 +515,15 @@ static int open_window(intro_app *a)
 
 static void close_window(intro_app *a)
 {
+    if (a->image) { a->image->data = NULL; XDestroyImage(a->image); a->image = NULL; }
+    free(a->view);
+    a->view = NULL;
+    a->scale = 0;
     if (!a->display) return;
-    if (a->image) { a->image->data = NULL; XDestroyImage(a->image); }
     if (a->gc) XFreeGC(a->display, a->gc);
     XCloseDisplay(a->display);
     a->display = NULL;
+    a->gc = NULL;
     a->window_open = 0;
 }
 

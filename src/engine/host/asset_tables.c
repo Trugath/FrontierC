@@ -668,7 +668,7 @@ done:
     names_free(probe);
     free(probe);
     csv_free(&csv);
-    if (status) fe2_asset_fail("catalogue sector layout changed");
+    if (status && !fe2_asset_error()[0]) fe2_asset_fail("catalogue sector layout changed");
     return status;
 }
 
@@ -752,7 +752,7 @@ done:
     free(text);
     fe2_buf_free(&strings);
     fe2_ini_free(&ini);
-    if (status) fe2_asset_fail("market text layout changed");
+    if (status && !fe2_asset_error()[0]) fe2_asset_fail("market text layout changed");
     return status;
 }
 
@@ -1221,7 +1221,7 @@ done:
     fe2_buf_free(&text);
     fe2_buf_free(&blob);
     fe2_ini_free(&ini);
-    if (status) fe2_asset_fail("market resources must cover 00A2h..06EAh exactly");
+    if (status && !fe2_asset_error()[0]) fe2_asset_fail("market resources must cover 00A2h..06EAh exactly");
     return status;
 }
 
@@ -1839,7 +1839,7 @@ done:
     free(image);
     names_free(names);
     free(names);
-    if (status) fe2_asset_fail("systems resources must cover 00A2h..3F20h exactly");
+    if (status && !fe2_asset_error()[0]) fe2_asset_fail("systems resources must cover 00A2h..3F20h exactly");
     return status;
 }
 
@@ -2000,7 +2000,7 @@ done:
     csv_free(&csv);
     names_free(names);
     free(names);
-    if (status) fe2_asset_fail("catalogue record count changed");
+    if (status && !fe2_asset_error()[0]) fe2_asset_fail("catalogue record count changed");
     return status;
 }
 

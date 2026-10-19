@@ -139,14 +139,16 @@ class ExtractAssets(unittest.TestCase):
             self.assertTrue((root / 'text/frontier/identifiers.txt').is_file())
             self.assertTrue((root / 'adlib/bank.ini').is_file())
             self.assertTrue((root / 'galaxy/tables.ini').is_file())
+            self.assertTrue((root / 'economy/tables.ini').is_file())
+            self.assertTrue((root / 'systems/catalogue/records.tsv').is_file())
+            self.assertTrue((root / 'text/market/strings.tsv').is_file())
             self.assertFalse((root / 'text/interaction/strings.tsv').exists())
             self.assertFalse((root / 'text/frontier/strings.tsv').exists())
             self.assertFalse((root / 'adlib/records.tsv').exists())
             self.assertFalse((root / 'galaxy/density.pgm').exists())
+            self.assertFalse((root / 'economy/README.md').exists())
             self.assertTrue((root / 'graphics/el2g.ini').is_file())
             self.assertTrue((root / 'intro/objects.ini').is_file())
-            self.assertFalse((root / 'economy').exists())
-            self.assertFalse((root / 'systems').exists())
 
     def test_text_catalog_round_trips_from_its_directory(self):
         image = bytearray(b'\x04\x00\x07\x00Hi\x00A\x00')

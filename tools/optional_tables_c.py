@@ -61,7 +61,8 @@ def speaker(path):
             names.append(name)
         output += f'static const uint8_t *const {kind}[] = {{' + ','.join(names) + '};\n'
     output += 'const fe2_speaker_sounds fe2_speaker_default_sounds = {game_effects, level_durations, divisors, effects, patterns};\n'
-    path.write_text(output, encoding='ascii')
+    # The migration fixture pins these bytes, including CRLF from the original Windows write.
+    path.write_text(output, encoding='ascii', newline='\r\n')
 
 
 def setup(path):

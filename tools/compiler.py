@@ -56,7 +56,8 @@ def windows_executable_inputs(compiler, directory, target=None):
     directory = Path(directory).resolve()
     directory.mkdir(parents=True, exist_ok=True)
     resource = directory / 'windows.res'
-    subprocess.run([str(compiler), 'rc', str(host / 'windows.rc'), str(resource)],
+    # Absolute inputs start with '/', which zig rc also accepts as an option prefix.
+    subprocess.run([str(compiler), 'rc', '--', str(host / 'windows.rc'), str(resource)],
                    check=True, cwd=host)
     return [str(host / 'windows_crt.c'), str(resource)]
 

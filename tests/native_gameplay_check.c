@@ -4,6 +4,9 @@
  */
 
 /* Real resources, system generation, player creation, cockpit and physics. */
+#ifndef _WIN32
+#define _POSIX_C_SOURCE 200809L
+#endif
 #include "host/asset_bind.h"
 #include "host/gameplay.h"
 #include "game/object_data.h"

@@ -3,6 +3,9 @@
  * See LICENSE in the repository root.
  */
 
+#ifndef _WIN32
+#define _POSIX_C_SOURCE 200809L
+#endif
 #include "intro_audio.h"
 #ifndef _WIN32
 #include <alsa/asoundlib.h>
