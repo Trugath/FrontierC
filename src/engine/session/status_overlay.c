@@ -12,8 +12,8 @@ enum { STATUS_SLOT = 14 };
 /* ---- The shared globals ------------------------------------------------ */
 /* By hand (status's state is not in the generator's list), with the
  * generator's owners: the session, its objects layer (o) and the shared
- * resident store. Not carried: the registration (0x2133, bytes where the
- * objects layer has the lost-control words), the palette ramp (0x1ff5,
+ * resident store. The registration (0x2133) is copied from the ship on
+ * entry so refuel can write it back. Not carried: the palette ramp (0x1ff5,
  * words where the store has dwords), the fourth permit word (0x516b, a
  * record pointer in the store) and the globals nothing else shares. */
 static void load(fe2_session_status_overlay *b)
@@ -42,6 +42,10 @@ static void load(fe2_session_status_overlay *b)
     st->reliability = (int16_t)s->resident.rating;
     st->legal_authority = s->resident.legal_allegiance;
     st->ship = (fe2_object *)o->player_record;
+    /* Refuel copies this back onto the ship. It is the ship's own
+     * registration; nothing else keeps a second copy. */
+    if (st->ship)
+        memcpy(st->registration, st->ship->as.craft.registration, sizeof st->registration);
     st->time_of_day = s->pools.clock[0];
     st->day = s->pools.clock[1];
     st->frame_time = s->render_step;
@@ -135,6 +139,34 @@ static void show_panel(void *opaque)
 {
     fe2_session_status_overlay *b = opaque;
     fe2_pointer_regions_reset(&b->session->regions);
+}
+/* Five words a region (left, top, right, bottom, id). The next left edge
+ * of 0xffff ends the list. The cargo page's last region is Refuel (0x66). */
+static uint16_t widget_word(const uint8_t *bytes)
+{
+    return (uint16_t)(bytes[0] | (bytes[1] << 8));
+}
+static void set_widgets(void *opaque, const fe2_widget_table *widgets)
+{
+    fe2_session_status_overlay *b = opaque;
+    const uint8_t *bytes = (const uint8_t *)widgets;
+    fe2_pointer_region stream[FE2_POINTER_REGIONS];
+    size_t n = 0;
+    if (!bytes) return;
+    while (n < FE2_POINTER_REGIONS && widget_word(bytes) != FE2_POINTER_REGION_END) {
+        stream[n].left = widget_word(bytes);
+        stream[n].top = widget_word(bytes + 2);
+        stream[n].right = widget_word(bytes + 4);
+        stream[n].bottom = widget_word(bytes + 6);
+        stream[n].id = widget_word(bytes + 8);
+        bytes += 10;
+        ++n;
+    }
+    if (n == FE2_POINTER_REGIONS && widget_word(bytes) != FE2_POINTER_REGION_END) {
+        b->session->error = 1;
+        return;
+    }
+    if (fe2_pointer_regions_append(&b->session->regions, stream, n) < 0) b->session->error = 1;
 }
 static int poll_key(void *opaque, uint8_t *key)
 {
@@ -368,7 +400,8 @@ int fe2_session_bind_status_overlay(fe2_session *s, fe2_session_objects *objects
     b->session = s; b->objects = objects;
     v = &b->services; v->opaque = b;
     status_forward_all(v);
-    v->set_panel_mode = set_panel_mode; v->show_panel = show_panel; v->poll_key = poll_key;
+    v->set_panel_mode = set_panel_mode; v->show_panel = show_panel; v->set_widgets = set_widgets;
+    v->poll_key = poll_key;
     v->forward_key = forward_key; v->post_event = post_event; v->select_music = select_music;
     v->random = random_word; v->random_below = random_below; v->orient_camera = orient_camera;
     v->spawn_object = spawn_object; v->lookup_object = lookup_object; v->visit_objects = visit_objects;
