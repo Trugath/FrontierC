@@ -955,6 +955,32 @@ int main(int argc, char **argv)
             ink, host.renders - renders);
         fe2_render_runtime_destroy(runtime); return 0;
     }
+    if (argc > 2 && !strcmp(argv[2], "deliver")) {
+        fe2_contract contract;
+        uint32_t cash, system = session.resident.current_system;
+        unsigned n;
+        memset(&contract, 0, sizeof contract);
+        contract.fee = 42; contract.group = 0x1c; contract.kind = 1;
+        contract.destination = system; contract.deadline = session.pools.clock[1] + 1000;
+        contract.client = 0x12345678;
+        fe2_session_status_add_contract(&game.status, &contract);
+        assert(game.status.state.contract_count == 1);
+        assert(!fe2_session_broadcast(&session, 5));
+        cash = game.status.state.cash;
+        assert(session.metadata[14].flags & 1u);
+        assert(game.offences.state.expected_letter >= 'A' && game.offences.state.expected_letter <= 'Z');
+        assert(game.station.state.question[0] == (int16_t)game.offences.state.challenge[0]);
+        assert(game.station.state.question[1] == (int16_t)game.offences.state.challenge[1]);
+        assert(game.station.state.question[2] == (int16_t)game.offences.state.challenge[2]);
+        for (n = 0; n < 800 && game.status.state.contract_count; ++n) frame();
+        printf("Parcel delivered: frames %u cash %u -> %u contracts %u letter %c\n",
+               n, cash, game.status.state.cash, game.status.state.contract_count,
+               game.offences.state.expected_letter);
+        assert(n < 800 && game.status.state.contract_count == 0);
+        assert(game.status.state.cash == cash + 420);
+        assert(!session.error && !host.errors);
+        fe2_render_runtime_destroy(runtime); return 0;
+    }
     if (argc > 2 && !strcmp(argv[2], "commander")) {
         /* Commander files (M10): save in flight, change the game, load the
          * file back. The working directory is the DOS drive. */
@@ -983,6 +1009,11 @@ int main(int argc, char **argv)
             fe2_session_status_add_contract(&game.status, &contract);
         }
         assert(game.status.state.contract_count == 1);
+        /* Distinct from each other, and still above the failure roll. A save
+         * must not clear the equipment counter where the uppercase name ends. */
+        game.objects.state.equipment_threshold = 0x1e1;
+        game.objects.state.drive_threshold = 0x1e2;
+        game.objects.state.servicing = 0x10000000u;
         balance = game.objects.state.bounty; cargo = game.objects.state.cargo[3];
         for (k = 0; k < 3; ++k) position[k] = ship->position_high[k];
         live = occupied(&session);
@@ -1012,6 +1043,19 @@ int main(int argc, char **argv)
         memcpy(saved_market, game.market.state.markets.bytes, sizeof saved_market);
         printf("Saved: JAMESON._01, %zu bytes, balance %u, cargo %u, system %08x\n", first_length, balance, cargo,
                system);
+        /* The same name is refused. The notice has to return on a key; the
+         * frame is inside that wait, so the pump supplies it. */
+        strcpy(game.menu.state.extension, "._01");
+        host.pump = sentence_key;
+        fe2_input_restore(&session.pointer, 0x0d); frame();
+        host.pump = NULL;
+        assert(game.menu.state.menu_mode == FE2_MENU_SAVE);
+        f = fopen("JAMESON._01", "rb");
+        assert(f);
+        assert(fread(second, 1, sizeof second, f) == first_length);
+        fclose(f);
+        assert(!memcmp(first, second, first_length));
+        printf("Save overwrite dismissed\n");
         /* The game changes: cash, cargo, the ship moves on. */
         game.objects.state.bounty = 5000; game.objects.state.cargo[3] = 0;
         game.status.state.contracts[0].fee = 999;
@@ -1035,6 +1079,9 @@ int main(int argc, char **argv)
         assert(restarts == 1 && game.objects.state.bounty == balance && game.objects.state.cargo[3] == cargo);
         assert(occupied(&session) == live && ship->position_high[0] == position[0]);
         assert(game.hyperspace.state.current_system == system);
+        assert(game.objects.state.equipment_threshold == 0x1e1);
+        assert(game.objects.state.drive_threshold == 0x1e2);
+        printf("Service counters restored\n");
         assert(game.status.state.contracts[0].fee == 42 && game.status.state.contracts[0].destination == 0xa91dc5c1);
         assert(game.status.state.contracts[0].client == 0x12345678 && game.status.state.contract_count == 1);
         printf("Commander contract restored\n");
@@ -2033,6 +2080,44 @@ int main(int argc, char **argv)
             /* Contracts leave the preview alone. Every other page turns it. */
             if (game.status.state.page == 0x0a) assert(game.status.state.preview_angle[0] == angle);
             else assert(game.status.state.preview_angle[0] != angle);
+        }
+        {
+            fe2_object *ship;
+            uint16_t held, index;
+            unsigned region;
+            int found = 0;
+            /* An empty hold skips the cargo page, so open it directly. The
+             * refuel hotspot is the last widget on that page. */
+            game.status.state.page = 6;
+            frame();
+            assert(game.status.state.page == 6 && game.status.state.screen_active);
+            for (region = 0; region < FE2_POINTER_REGIONS &&
+                 session.regions.region[region].left != FE2_POINTER_REGION_END; ++region)
+                if (session.regions.region[region].id == 0x66) found = 1;
+            assert(found);
+            ship = game.status.state.ship;
+            index = ship->as.craft.drive >= 10 ? 20 : 19;
+            ship->fuel = 0;
+            game.objects.state.cargo[index] = (uint16_t)(game.objects.state.cargo[index] + 1);
+            held = game.objects.state.cargo[index];
+            fe2_input_restore(&session.pointer, 0x66); frame();
+            printf("Refuelled: cargo %u %u -> %u, fuel %08x\n", index, held,
+                   game.objects.state.cargo[index], ship->fuel);
+            assert(game.objects.state.cargo[index] == (uint16_t)(held - 1));
+            assert(ship->fuel == 0x20000000u);
+        }
+        {
+            uint8_t letter;
+            game.market.state.markets.bytes[FE2_PROFILE_WORD_AT] = 8;
+            game.market.state.markets.bytes[FE2_PROFILE_WORD_AT + 1] = 0;
+            session.resident.trade_codes_0 = 0x80;
+            game.objects.state.cargo[0] = 3;
+            assert(fe2_session_broadcast(&session, 5) == 0);
+            letter = game.offences.state.expected_letter;
+            printf("Customs: letter %c law %u\n", letter, game.offences.state.law_level);
+            assert(letter >= 'A' && letter <= 'Z');
+            assert(game.offences.state.law_level == 8);
+            assert(!session.error);
         }
         fe2_render_runtime_destroy(runtime); return 0;
     }

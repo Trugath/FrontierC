@@ -138,7 +138,8 @@ class NativeGameplay(unittest.TestCase):
                                     timeout=180, cwd=d)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         for phase in ('Save dialog:', 'Saved: JAMESON._01', 'Loaded: restarts 1', 'position restored', 'Image again',
-                      'Saved again', 'Flying on', 'Opaque commander bytes preserved'):
+                      'Saved again', 'Flying on', 'Opaque commander bytes preserved',
+                      'Save overwrite dismissed', 'Service counters restored'):
             self.assertIn(phase, result.stdout)
         print(result.stdout, end='')
         original = os.environ.get('FE2_ORIGINAL_COMMANDER')
@@ -154,6 +155,12 @@ class NativeGameplay(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn('Original commander continued for 120 native frames', result.stdout)
             print(result.stdout, end='')
+
+    def test_parcel_delivery(self):
+        result = subprocess.run([str(self.check), '1', 'deliver'], text=True, capture_output=True, timeout=180)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('Parcel delivered:', result.stdout)
+        print(result.stdout, end='')
 
     def test_gameplay_loops(self):
         result = subprocess.run([str(self.check), str(0x201), 'loops'], text=True, capture_output=True,
@@ -190,6 +197,8 @@ class NativeGameplay(unittest.TestCase):
                                         capture_output=True, timeout=60)
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 self.assertEqual(result.stdout.count('Ship information page'), 8)
+                self.assertIn('Refuelled:', result.stdout)
+                self.assertIn('Customs:', result.stdout)
 
     def test_map_and_phone(self):
         result = subprocess.run([str(self.check), '1', 'screens'], text=True, capture_output=True, timeout=60)
