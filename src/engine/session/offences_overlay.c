@@ -112,7 +112,7 @@ static fe2_object *route_create_object(void *opaque, const fe2_call_args *args)
     fe2_call_args work = *args;
     fe2_object *object;
     if (!s->calls.population_create) return offences_host_create_object(opaque, args);
-    offences_out(b); object = s->calls.population_create(FE2_OVERLAY_CONTEXT(s, 11), &work); offences_back(b);
+    offences_out(b); object = s->calls.population_create(FE2_OVERLAY_CONTEXT(s, 11), 0, &work); offences_back(b);
     return object;
 }
 

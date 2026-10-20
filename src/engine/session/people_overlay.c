@@ -308,16 +308,17 @@ uint16_t fe2_session_people_create(fe2_session_people_overlay *b, uint16_t paren
     return result;
 }
 
-/* The session's population_create: 0x8a with the caller's parameters (BX,
- * the parent, is 0: the routed modes 5..8 do not read it); the
- * parameters go back to the caller, and the new object is parameter 9. */
-static fe2_object *population_create(void *context, fe2_call_args *args)
+/* The session's population_create: 0x8a with BX (`parent`: the model for
+ * mode 6, the behaviour parent for modes 1..4; modes 5, 7 and 8 do not
+ * read it) and the caller's parameters. The parameters go back to the
+ * caller, and the new object is parameter 9. */
+static fe2_object *population_create(void *context, uint16_t parent, fe2_call_args *args)
 {
     fe2_session_people_overlay *b = context;
     uint16_t made;
     if (!args) { b->session->error = 1; return 0; }
     b->args = *args;
-    made = fe2_session_people_create(b, 0);
+    made = fe2_session_people_create(b, parent);
     *args = b->args;
     if (!made || args->arg[P_CREATED].kind != FE2_ARG_OBJECT) return 0;
     return (fe2_object *)args->arg[P_CREATED].ref;

@@ -28,8 +28,8 @@
  *
  * The other overlays (chart, catalogue, market, names, commander, station, offences, drives) are the
  * session's registered entries (overlay_calls.h) when there are any, and
- * the host's otherwise. people registers population_create (0x8a with the
- * caller's parameters); the update entry (+0x1c) needs the object and the
+ * the host's otherwise. people registers population_create (0x8a with BX
+ * and the caller's parameters); the update entry (+0x1c) needs the object and the
  * step, which population_update does not carry, so it is not registered.
  *
  * The session and the objects layer own the resident globals people reads

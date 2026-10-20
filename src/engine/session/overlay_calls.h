@@ -82,10 +82,10 @@ typedef struct fe2_overlay_calls {
     void (*menu_reset)(void *context);
     void (*menu_restore_time)(void *context);
     uint8_t (*menu_check)(void *context);
-    /* people: create a craft (parameters as the original's), and the update
-     * entry (+0x1c, 0x86) of `object` over `step` (DX:AX), returning the
-     * object it leaves in parameter 9. */
-    fe2_object *(*population_create)(void *context, fe2_call_args *args);
+    /* people: create a craft (BX the parent or model, parameters as the
+     * original's), and the update entry (+0x1c, 0x86) of `object` over
+     * `step` (DX:AX), returning the object it leaves in parameter 9. */
+    fe2_object *(*population_create)(void *context, uint16_t parent, fe2_call_args *args);
     fe2_object *(*population_update)(void *context, fe2_object *object, uint32_t step);
     /* station: show message `text`. */
     void (*message)(void *context, uint16_t text, const fe2_call_args *args);
