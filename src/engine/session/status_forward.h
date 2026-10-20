@@ -226,13 +226,13 @@ static void status_host_visit_objects(void *opaque, fe2_object_list * p0, fe2_ob
     if (!binding_->host.visit_objects) return;
     status_out(binding_); binding_->host.visit_objects(binding_->host.opaque, p0, p1, p2); status_back(binding_);
 }
-static void status_host_market_service(void *opaque, uint16_t p0, uint16_t p1, const fe2_call_args * p2)
+static void status_host_market_service(void *opaque, uint16_t p0, uint16_t p1, fe2_call_args * p2)
 {
     fe2_session_status_overlay *binding_ = opaque;
     if (!binding_->host.market_service) return;
     status_out(binding_); binding_->host.market_service(binding_->host.opaque, p0, p1, p2); status_back(binding_);
 }
-static fe2_object * status_host_create_object(void *opaque, uint16_t p0, const fe2_call_args * p1)
+static fe2_object * status_host_create_object(void *opaque, uint16_t p0, fe2_call_args * p1)
 {
     fe2_session_status_overlay *binding_ = opaque;
     fe2_object * result_;

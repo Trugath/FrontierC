@@ -29,10 +29,10 @@
  * Native services: the overlay selection, the panel's region reset
  *, input, events, random numbers,
  * allocation, lookup, the object visitor, the basis
- * (0x2dc, from the view angles) and music. The station message and the
- * panels panel go through the session's overlay calls when registered.
- * Everything else (and those without a provider) is the host's, from
- * `host`.
+ * (0x2dc, from the view angles) and music. The station message, the
+ * panels panel, the market reference service and people creation go
+ * through the session's overlay calls when registered. Everything else
+ * (and those without a provider) is the host's, from `host`.
  *
  * status has no generated resident sync: the binding carries by hand the
  * commander state's DS globals the session, its objects layer and the

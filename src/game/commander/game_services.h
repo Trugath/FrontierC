@@ -85,14 +85,16 @@ typedef struct fe2_game_services {
     void (*orient_object)(void *opaque, fe2_object *object);
     void (*visit_objects)(void *opaque, fe2_object_list *objects,
                           fe2_object_visitor visitor, void *context);
-    /* market market service (BX) with request AX; status uses service 9 for child
-     * objects, passing the option and source as parameters. */
+    /* market market service (BX) with request AX. Parameters 0..7 come back;
+     * status uses service 9 for a child, with the option in parameter 7 and
+     * the source in parameter 9, and reads the slot offset from 0..5. */
     void (*market_service)(void *opaque, uint16_t service, uint16_t request,
-                           const fe2_call_args *args);
+                           fe2_call_args *args);
     /* people creation with BX = `model` (the local authority for contract
      * company, the target model for escorts, 9 for child objects); the mode
-     * is parameter 7. Returns the new object or null. */
-    fe2_object *(*create_object)(void *opaque, uint16_t model, const fe2_call_args *args);
+     * is parameter 7. Returns the new object or null. The parameters come
+     * back, with the new object in parameter 9. */
+    fe2_object *(*create_object)(void *opaque, uint16_t model, fe2_call_args *args);
     /* drives drive summary (request 1) for the ship in parameter 8; its two
      * results (the original's 0x7c8 and 0x7d0) are the drive ranges shown. */
     void (*drive_summary)(void *opaque, uint16_t request, const fe2_call_args *args,

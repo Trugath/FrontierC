@@ -1328,6 +1328,62 @@ int main(int argc, char **argv)
             game.beams);
         fe2_render_runtime_destroy(runtime); return 0;
     }
+    if (argc > 2 && !strcmp(argv[2], "spawn")) {
+        /* A canister takes the station's slot offset from market service 9,
+         * then people creation mode 7. Contract company is creation mode 1
+         * with the authority in BX. */
+        fe2_object *station = 0, *child = 0, *company;
+        fe2_call_args args;
+        unsigned slot, tries, child_slot = 0;
+        int64_t clearance;
+        for (slot = 1; slot < FE2_POOL_SLOTS; ++slot) {
+            fe2_object *o = session.objects.records[slot];
+            if (o && o->role == 1 && (o->flags & 0x40u) && o->level < 0x11) { station = o; break; }
+        }
+        assert(station);
+        for (tries = 0; tries < 400 && !child; ++tries) {
+            uint16_t seen_model[FE2_POOL_SLOTS];
+            uint32_t seen_pos[FE2_POOL_SLOTS];
+            uint16_t seen_status[FE2_POOL_SLOTS];
+            memset(seen_model, 0, sizeof seen_model);
+            memset(seen_pos, 0, sizeof seen_pos);
+            memset(seen_status, 0, sizeof seen_status);
+            for (slot = 1; slot < FE2_POOL_SLOTS; ++slot) {
+                fe2_object *o = session.objects.records[slot];
+                seen_status[slot] = session.objects.status[slot];
+                if (o) { seen_model[slot] = o->model; seen_pos[slot] = o->position_low[0]; }
+            }
+            fe2_status_spawn_child(&game.status.services, station);
+            assert(!session.error);
+            for (slot = 1; slot < FE2_POOL_SLOTS; ++slot) {
+                fe2_object *o = session.objects.records[slot];
+                if (!o || o->role != 11 || !session.objects.status[slot] ||
+                    (session.objects.status[slot] & FE2_SLOT_REUSABLE)) continue;
+                if (seen_status[slot] && !(seen_status[slot] & FE2_SLOT_REUSABLE) &&
+                    seen_model[slot] == o->model && seen_pos[slot] == o->position_low[0]) continue;
+                child = o;
+                child_slot = slot;
+            }
+        }
+        assert(child);
+        clearance = station_clearance(child, station, 1);
+        printf("Canister %s: model %04x clearance %lld\n",
+            station->name, child->model, (long long)clearance);
+        assert(clearance > 1000);
+        for (i = 0; i < 60; ++i) frame();
+        assert(!session.error);
+        assert(session.objects.records[child_slot] == child);
+        assert(session.objects.status[child_slot] &&
+               !(session.objects.status[child_slot] & FE2_SLOT_REUSABLE));
+        assert(child->model != 0xbc && child->behaviour != 0x64);
+        fe2_args_clear(&args);
+        fe2_args_word(&args, 7, 1);
+        company = game.status.services.create_object(game.status.services.opaque, 0x3c, &args);
+        assert(company && company->behaviour_parent == 0x3c);
+        assert(!session.error);
+        printf("Company: model %04x parent %02x\n", company->model, company->behaviour_parent);
+        fe2_render_runtime_destroy(runtime); return 0;
+    }
     if (argc > 2 && !strcmp(argv[2], "ports")) {
         /* slot_vector's six banks: four rotating shapes, a fixed city, and a
          * free orbital body. Each must put a ship outside the station and

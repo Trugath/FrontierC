@@ -76,6 +76,14 @@ class NativeGameplay(unittest.TestCase):
         self.assertIn('beams', result.stdout)
         self.assertIn('Comms wrap', result.stdout)
 
+    def test_status_spawn_clears_the_source(self):
+        result = subprocess.run([str(self.check), '0x101', 'spawn'], text=True,
+                                capture_output=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('Canister ', result.stdout)
+        self.assertIn('Company:', result.stdout)
+        print(result.stdout, end='')
+
     def test_police_launch_from_each_station(self):
         result = subprocess.run([str(self.check), '0x101', 'ports'], text=True,
                                 capture_output=True, timeout=60)

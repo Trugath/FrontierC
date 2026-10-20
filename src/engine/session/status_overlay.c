@@ -245,6 +245,35 @@ static void route_panel(void *opaque, uint16_t panel, const fe2_call_args *args)
     else fe2_args_clear(&block);
     OUT(b); s->calls.panel(FE2_OVERLAY_CONTEXT(s, 4), panel, STATUS_SLOT, &block); BACK(b);
 }
+/* market (overlay 0x38, +0x20): service BX with request AX. Parameters 0..7
+ * come back in the caller's block. A copy that is thrown away leaves a
+ * child at the option byte, inside its source. */
+static void route_market(void *opaque, uint16_t service, uint16_t request, fe2_call_args *args)
+{
+    fe2_session_status_overlay *b = opaque;
+    fe2_session *s = b->session;
+    fe2_call_args work;
+    if (!args) return;
+    work = *args;
+    if (!s->calls.market) { status_host_market_service(opaque, service, request, args); return; }
+    OUT(b); (void)s->calls.market(FE2_OVERLAY_CONTEXT(s, 7), service, request, &work, 0); BACK(b);
+    *args = work;
+}
+/* people (overlay 0x58, +0x20): creation with BX = `model` and the mode in
+ * parameter 7. The new object comes back as the result and in parameter 9. */
+static fe2_object *route_create(void *opaque, uint16_t model, fe2_call_args *args)
+{
+    fe2_session_status_overlay *b = opaque;
+    fe2_session *s = b->session;
+    fe2_call_args work;
+    fe2_object *object;
+    if (!args) { s->error = 1; return 0; }
+    if (!s->calls.population_create) return status_host_create_object(opaque, model, args);
+    work = *args;
+    OUT(b); object = s->calls.population_create(FE2_OVERLAY_CONTEXT(s, 11), model, &work); BACK(b);
+    *args = work;
+    return object;
+}
 
 /* ---- Entries ------------------------------------------------------------ */
 #define ENTER(context) fe2_session_status_overlay *b = context; (void)s; load(b); ++b->depth
@@ -339,6 +368,7 @@ int fe2_session_bind_status_overlay(fe2_session *s, fe2_session_objects *objects
     v->random = random_word; v->random_below = random_below; v->orient_camera = orient_camera;
     v->spawn_object = spawn_object; v->lookup_object = lookup_object; v->visit_objects = visit_objects;
     v->show_message = route_message; v->open_panel = route_panel;
+    v->market_service = route_market; v->create_object = route_create;
     o = &s->overlays[STATUS_SLOT];
     o->context = b;
     o->initialize = initialize; o->activate = activate; o->event = event; o->update = input;
