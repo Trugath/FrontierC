@@ -194,6 +194,8 @@ static void draw(void *context, fe2_session *s)
     ENTER(context);
     b->status = 0;
     if (b->state.mode < 0) {
+        /* The home marker reads the live jump range (0x20e5) and scales it. */
+        b->state.marker_range = s->resident.jump_range;
         b->status = fe2_map_draw(&b->state, &b->services);
         if (!b->status && b->state.selection_status)
             b->status = fe2_map_draw_selection(&b->state, &b->services);

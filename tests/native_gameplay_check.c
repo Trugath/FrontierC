@@ -2254,6 +2254,29 @@ int main(int argc, char **argv)
             printf("Galactic labels use each star's sector and index\n");
         }
         {
+            fe2_text_resources text = resources.text;
+            uint8_t rendered[64];
+            text.value[0] = 5;
+            text.value[1] = (uint32_t)(int32_t)-3;
+            assert(!fe2_text_expand(&text, 0x84ae, rendered, sizeof rendered, NULL));
+            assert(!strcmp((char *)rendered, "Sector: 5,-3"));
+            text.value[0] = 12;
+            assert(!fe2_text_expand(&text, 0x84af, rendered, sizeof rendered, NULL));
+            assert(!strcmp((char *)rendered, "Fuel Required: 12t"));
+            text.value[0] = 0;
+            assert(!fe2_text_expand(&text, 0x84af, rendered, sizeof rendered, NULL));
+            assert(!strcmp((char *)rendered, "Fuel Required: -"));
+            printf("Map status text uses the travel figures\n");
+            game.flight.state.jump_range = 0x320;
+            game.hyperspace.state.jump_range = 0x320;
+            session.resident.jump_range = 0x320;
+            frame();
+            assert(game.map.state.marker_range == 0x320);
+            game.flight.state.jump_range = 0;
+            game.hyperspace.state.jump_range = 0;
+            session.resident.jump_range = 0;
+        }
+        {
             fe2_map_details details;
             uint8_t ui_palette[128][3];
             memcpy(ui_palette, video->palette, sizeof ui_palette);

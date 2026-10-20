@@ -674,8 +674,8 @@ static void market_format_number(void *opaque, uint16_t format, const fe2_call_a
 
 /* The overlays' own text entries (+0x28) the formatter reaches: chart's
  * packed system references (0x3fc the sector pair, 0x3fe the name of the
- * system in parameter 1), and market's price list (0x8e1f). Other selectors
- * use the text directories. */
+ * system in parameter 1) and its directory strings, and market's price list
+ * (0x8e1f). Other selectors use the text directories. */
 static int overlay_text(void *p, const fe2_text_resources *r, unsigned slot, uint16_t doubled,
                         char *out, size_t capacity)
 {
@@ -713,8 +713,18 @@ static int overlay_text(void *p, const fe2_text_resources *r, unsigned slot, uin
         return 0;
     }
     if (slot != 2) return -1;
-    return fe2_map_format_text(&g->map.services, doubled, (uint16_t)r->value[2],
-        (uint16_t)r->value[3], (uint16_t)r->value[4], r->value[0], NULL, out, capacity);
+    {
+        /* A directory string (the sector line, the fuel line) is expanded
+         * again here, so the formatter's parameters have to travel with it. */
+        fe2_call_args args;
+        unsigned i;
+        fe2_args_clear(&args);
+        for (i = 0; i < 5; ++i) fe2_args_dword(&args, i + 1, r->value[i]);
+        fe2_args_dword(&args, 10, r->pointer_value[0]);
+        fe2_args_dword(&args, 11, r->pointer_value[1]);
+        return fe2_map_format_text(&g->map.services, doubled, (uint16_t)r->value[2],
+            (uint16_t)r->value[3], (uint16_t)r->value[4], r->value[0], &args, out, capacity);
+    }
 }
 /* The commander file's image. The object block keeps the original
  * directory: the slot status bytes, slot 0's first 0x60 bytes at 0x74, then
