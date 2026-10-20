@@ -172,7 +172,10 @@ void fe2_commander_delete(fe2_commander_state *s, const fe2_commander_services *
     uint8_t key;
     int error;
     draw_file_status(s, game, DELETE_TEXT, s->colours[COLOUR_10], name, 1);
-    while (!game->poll_key(game->opaque, &key)) {}
+    do {
+        s->tick = 1;
+        game->wait_tick(game->opaque);
+    } while (!game->poll_key(game->opaque, &key));
     if (key == KEY_YES) {
         full_path(s, name, path);
         if ((error = dos->delete_file(dos->opaque, path)) != 0) {

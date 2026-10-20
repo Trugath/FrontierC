@@ -994,14 +994,23 @@ static void menu_redraw_name(fe2_gameplay *g, const char *literal, uint8_t colou
 }
 /*, BP bit 15 set: letters, digits and underscore. Enter returns.
  * Backspace paints the old name in black, then the shorter one. */
-/* A file error waits out the tick with the message on screen. */
+/* A file error waits out one timer tick with the message on screen. The
+ * frame loop is inside this wait, so the tick and the window pump run
+ * here. A held suppression would otherwise swallow the dismissing key,
+ * and a click is a key once the pointer is sampled. */
 static void menu_wait(void *p)
 {
     fe2_gameplay *g = game(p);
+    fe2_session *s = g->session;
+    uint8_t suppressed = s->input.suppress;
     if (g->host->present)
         (void)fe2_video_present(fe2_render_runtime_video(g->host->runtime),
             g->host->present, g->host->present_context);
+    s->input.suppress = 0;
     if (g->host->pump) (void)g->host->pump(g->host->present_context);
+    s->input.suppress = suppressed;
+    fe2_input_tick(&s->input, &s->pointer);
+    fe2_session_update_pointer(s, NULL, NULL);
 }
 static void menu_edit(void *p, char *literal, uint16_t length, uint8_t colour, uint16_t x, uint16_t y,
                       const fe2_call_args *a)
