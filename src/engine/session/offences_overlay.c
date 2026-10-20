@@ -4,6 +4,7 @@
  */
 
 #include "offences_overlay.h"
+#include "station_overlay.h"
 #include <string.h>
 
 enum { OFFENCES_SLOT = 15, SUBJECT_PARAMETER = 9, MARKET_SLOT_VECTOR = 9 };
@@ -126,9 +127,21 @@ static fe2_object *subject(fe2_session_offences_overlay *b)
     return pool && b->state.player_handle < FE2_POOL_SLOTS ? fe2_pool_record(pool, b->state.player_handle) : NULL;
 }
 
+/* The ownership words are the stack scratch the station reads when it
+ * opens. They are not a resident cell, so they are handed across here. */
+static void publish_challenge(fe2_session *s, const fe2_offence_state *st)
+{
+    fe2_session_station_overlay *station = s->overlays[12].context;
+    unsigned i;
+    if (s->overlays[12].context != s->calls.context[12] || !station) return;
+    for (i = 0; i < 3; ++i) station->state.question[i] = (int16_t)st->challenge[i];
+}
 static uint32_t event(void *context, fe2_session *s, uint32_t value)
 {
-    ENTER(context); fe2_offence_event(&b->state, &b->services, (uint8_t)value, subject(b)); LEAVE();
+    ENTER(context);
+    fe2_offence_event(&b->state, &b->services, (uint8_t)value, subject(b));
+    if (value == 5) publish_challenge(s, &b->state);
+    LEAVE();
     return value;
 }
 static void progress(void *context, fe2_session *s)

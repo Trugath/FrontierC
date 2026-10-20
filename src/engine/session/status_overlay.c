@@ -60,6 +60,9 @@ static void load(fe2_session_status_overlay *b)
         for (i = 0; i < 8; ++i) st->palette_ramp[i] = (uint16_t)(ramp[i / 2] >> (16 * (i % 2)));
     }
     st->objects = (fe2_object_list *)s->pools.root;
+    /* Bit 0 of the overlay flags is the arrival scan. The status byte keeps
+     * only that bit; the header's other flags stay as they were loaded. */
+    st->event_flags = (uint8_t)((st->event_flags & (uint8_t)~1u) | (s->metadata[STATUS_SLOT].flags & 1u));
 }
 static void store(fe2_session_status_overlay *b)
 {
@@ -105,6 +108,8 @@ static void store(fe2_session_status_overlay *b)
     s->resident.classification_2 = st->palette_ramp[4] | (uint32_t)st->palette_ramp[5] << 16;
     s->resident.classification_3 = st->palette_ramp[6] | (uint32_t)st->palette_ramp[7] << 16;
     s->pools.root = (fe2_object_pool *)st->objects;
+    s->metadata[STATUS_SLOT].flags = (uint8_t)((s->metadata[STATUS_SLOT].flags & (uint8_t)~1u) |
+                                              (st->event_flags & 1u));
 }
 /* Around native services and host calls: the state goes out first when
  * status is running (inside an entry; otherwise the session's copy is
