@@ -427,13 +427,16 @@ static void panel(void *p, uint16_t request, const fe2_call_args *a);
 static void text(void *p, uint16_t selector, uint8_t colour, uint16_t x, uint16_t y, const fe2_call_args *a);
 static void draw_expanded(void *p, uint16_t selector, uint8_t colour, uint16_t x, uint16_t y,
                           const fe2_call_args *a, int shadowed);
-/* stores the interaction colours at DS:0x9f3..0x9f5. A 0x1 control
- * indexes that map from 0x9e8, so 0xb..0xd are these three bytes. */
+/* A 0x1 control indexes the map at DS:0x9e8. List text uses 0x9f3..0x9f5
+ * (0xb..0xd). A message copies 0x8936..0x8938 into 0x9ea..0x9ec (2..4):
+ * the reply quotes the question in 3 and the answer in 4. */
 static void station_colours(fe2_gameplay *g)
 {
     unsigned i;
-    for (i = 0; i < 3; ++i)
+    for (i = 0; i < 3; ++i) {
+        g->host->colour_map[2u + i] = g->station.state.colours[1u + i];
         g->host->colour_map[0x0bu + i] = g->station.state.list_colours[i];
+    }
 }
 static void station_line(void *p, uint16_t selector, uint8_t colour, uint16_t x, uint16_t y,
                          const fe2_call_args *a, int shadowed)
