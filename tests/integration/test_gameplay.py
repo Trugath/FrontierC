@@ -198,6 +198,7 @@ class NativeGameplay(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 self.assertEqual(result.stdout.count('Ship information page'), 8)
                 self.assertIn('Refuelled:', result.stdout)
+                self.assertIn('Engines restored', result.stdout)
                 self.assertIn('Customs:', result.stdout)
 
     def test_map_and_phone(self):

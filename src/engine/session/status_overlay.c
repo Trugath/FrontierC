@@ -12,8 +12,9 @@ enum { STATUS_SLOT = 14 };
 /* ---- The shared globals ------------------------------------------------ */
 /* By hand (status's state is not in the generator's list), with the
  * generator's owners: the session, its objects layer (o) and the shared
- * resident store. The registration (0x2133) is copied from the ship on
- * entry so refuel can write it back. Not carried: the palette ramp (0x1ff5,
+ * resident store. The twelve bytes at 0x2133 are the control limits saved
+ * when the ship was created. Refuel writes them back: an empty tank clears
+ * the live limits. Not carried: the palette ramp (0x1ff5,
  * words where the store has dwords), the fourth permit word (0x516b, a
  * record pointer in the store) and the globals nothing else shares. */
 static void load(fe2_session_status_overlay *b)
@@ -42,10 +43,9 @@ static void load(fe2_session_status_overlay *b)
     st->reliability = (int16_t)s->resident.rating;
     st->legal_authority = s->resident.legal_allegiance;
     st->ship = (fe2_object *)o->player_record;
-    /* Refuel copies this back onto the ship. It is the ship's own
-     * registration; nothing else keeps a second copy. */
-    if (st->ship)
-        memcpy(st->registration, st->ship->as.craft.registration, sizeof st->registration);
+    /* These bytes are the limits, not the live ones. The live copy is what
+     * an empty tank zeroes. */
+    memcpy(st->registration, o->lost_controls, sizeof st->registration);
     st->time_of_day = s->pools.clock[0];
     st->day = s->pools.clock[1];
     st->frame_time = s->render_step;

@@ -215,7 +215,9 @@ static void refuel(fe2_commander_status *status, const fe2_game_services *game)
     }
     status->ship_flags &= (uint8_t)~1u;
     game->ship_type(game->opaque, ship->model);
-    memcpy(ship->as.craft.registration, status->registration, sizeof status->registration);
+    /* The saved limits (0x2133) occupy the same object bytes an empty tank
+     * clears. Putting them back is what makes the engines answer again. */
+    memcpy(ship->as.flight.control_limits, status->registration, sizeof status->registration);
     capacity = (uint16_t)(fe2_status_fuel_capacity[ship->as.craft.drive] << 8);
     ship->fuel += FUEL_UNIT;
     if (capacity <= (uint16_t)(ship->fuel >> 16)) {

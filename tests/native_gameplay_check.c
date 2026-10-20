@@ -2100,11 +2100,25 @@ int main(int argc, char **argv)
             ship->fuel = 0;
             game.objects.state.cargo[index] = (uint16_t)(game.objects.state.cargo[index] + 1);
             held = game.objects.state.cargo[index];
+            /* An empty tank zeroes the live limits and latches the warning.
+             * The copy taken at creation is what refuel writes back. */
+            for (region = 0; region < 6; ++region) {
+                uint16_t word = (uint16_t)(0x1111u * (region + 1));
+                game.objects.state.lost_controls[region] = word;
+                ((uint16_t *)game.flight.state.saved_limits)[region] = word;
+            }
+            memset(ship->as.flight.control_limits, 0, sizeof ship->as.flight.control_limits);
+            game.objects.state.warnings |= 1u;
             fe2_input_restore(&session.pointer, 0x66); frame();
             printf("Refuelled: cargo %u %u -> %u, fuel %08x\n", index, held,
                    game.objects.state.cargo[index], ship->fuel);
             assert(game.objects.state.cargo[index] == (uint16_t)(held - 1));
             assert(ship->fuel == 0x20000000u);
+            assert(!(game.objects.state.warnings & 1u));
+            for (region = 0; region < 6; ++region)
+                assert(((uint16_t *)ship->as.flight.control_limits)[region] ==
+                       (uint16_t)(0x1111u * (region + 1)));
+            printf("Engines restored\n");
         }
         {
             uint8_t letter;
