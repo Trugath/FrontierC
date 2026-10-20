@@ -63,7 +63,18 @@ void fe2_commander_write_image(const fe2_commander_state *s, fe2_save_image *ima
     for (i = 0; i < sizeof fields / sizeof fields[0]; ++i) {
         const image_field *f = &fields[i];
         uint8_t *to = image->resident + (f->offset - FE2_SAVE_RESIDENT_START);
-        for (n = 0; n < f->count; ++n, to += f->element) {
+        unsigned count = f->count;
+        /* The uppercase name is copied through its terminating zero, as the
+         * original stosb does. The 20-byte region at DS 0x2109 runs into the
+         * equipment service counter at 0x211b; padding it with zeros clears
+         * that counter and the ship then fails equipment that is not due. */
+        if (f->offset == 0x2109) {
+            const char *name = (const char *)s + f->at;
+            count = 0;
+            while (count < f->count && name[count] != 0) ++count;
+            if (count < f->count) ++count;
+        }
+        for (n = 0; n < count; ++n, to += f->element) {
             uint32_t value = get_value((const uint8_t *)s + f->at + n * f->element, f->element);
             for (b = 0; b < f->element; ++b) to[b] = (uint8_t)(value >> (8 * b));
         }
