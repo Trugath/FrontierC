@@ -115,6 +115,25 @@ static unsigned population(const fe2_session *s)
     }
     return n;
 }
+static int64_t axis_gap(uint32_t high_a, uint32_t low_a, uint32_t high_b, uint32_t low_b)
+{
+    int64_t d = (int64_t)((uint64_t)high_a << 32 | low_a) - (int64_t)((uint64_t)high_b << 32 | low_b);
+    return d < 0 ? -d : d;
+}
+
+static int64_t station_clearance(const fe2_object *ship, const fe2_object *station, int linked)
+{
+    int64_t gap = 0;
+    unsigned k;
+    for (k = 0; k < 3; ++k) {
+        int64_t d = linked ? axis_gap(ship->position_high[k], ship->position_low[k],
+                                      station->position_high[k], station->position_low[k])
+                           : axis_gap(ship->position_high[k], ship->position_low[k], 0, 0);
+        if (d > gap) gap = d;
+    }
+    return gap;
+}
+
 static unsigned patrols(const fe2_session *s)
 {
     unsigned n = 0, slot;
@@ -1206,7 +1225,17 @@ int main(int argc, char **argv)
             /* The station trickles one ship per coarse tick once 0414h, its
              * update byte, has climbed to FFFFh and back. */
             unsigned before = population(&session), slot, beside = 0;
+            uint16_t seen_model[FE2_POOL_SLOTS];
+            uint8_t seen_beh[FE2_POOL_SLOTS];
             fe2_object *source;
+            memset(seen_model, 0, sizeof seen_model);
+            for (slot = 1; slot < FE2_POOL_SLOTS; ++slot) {
+                fe2_object *o = session.objects.records[slot];
+                if (o && session.objects.status[slot] && !(session.objects.status[slot] & FE2_SLOT_REUSABLE)) {
+                    seen_model[slot] = o->model;
+                    seen_beh[slot] = o->behaviour;
+                }
+            }
             for (i = 0; i < 3000 && population(&session) <= before; ++i) frame();
             source = session.resident.police_station;
             assert(source);
@@ -1259,10 +1288,154 @@ int main(int argc, char **argv)
                 assert(placed > 0);
                 assert(session.metadata[15].flags == session.resident.police_flags);
                 assert(session.metadata[15].update == session.resident.launch_phase);
+                /* The slot vector has to clear the station. A discarded copy of
+                 * the market result leaves the kind byte (4 or 0x7c) as X, and
+                 * the ship is removed on the next contact pass. */
+                {
+                    fe2_object *ship = 0;
+                    unsigned ship_slot = 0;
+                    int64_t clearance = 0;
+                    for (slot = 1; slot < FE2_POOL_SLOTS; ++slot) {
+                        fe2_object *o = session.objects.records[slot];
+                        int64_t gap = 0;
+                        unsigned k;
+                        if (!o || o->role != 11 || !session.objects.status[slot] ||
+                            (session.objects.status[slot] & FE2_SLOT_REUSABLE)) continue;
+                        if (seen_model[slot] == o->model && seen_beh[slot] == o->behaviour) continue;
+                        for (k = 0; k < 3; ++k) {
+                            int64_t d = (int64_t)((uint64_t)o->position_high[k] << 32 | o->position_low[k]) -
+                                        (int64_t)((uint64_t)source->position_high[k] << 32 | source->position_low[k]);
+                            if (d < 0) d = -d;
+                            if (d > gap) gap = d;
+                        }
+                        ship = o;
+                        ship_slot = slot;
+                        clearance = gap;
+                    }
+                    assert(ship);
+                    printf("Police clear: model %04x behaviour %02x, %lld from the station\n",
+                        ship->model, ship->behaviour, (long long)clearance);
+                    assert(clearance > 1000);
+                    for (i = 0; i < 60; ++i) frame();
+                    assert(session.objects.records[ship_slot] == ship);
+                    assert(session.objects.status[ship_slot] &&
+                           !(session.objects.status[ship_slot] & FE2_SLOT_REUSABLE));
+                    assert(ship->model != 0xbc && ship->behaviour != 0x64);
+                }
             }
         }
         printf("Weapon held for 100 frames: offence recorded, fine message queued, %u beams\n",
             game.beams);
+        fe2_render_runtime_destroy(runtime); return 0;
+    }
+    if (argc > 2 && !strcmp(argv[2], "ports")) {
+        /* slot_vector's six banks: four rotating shapes, a fixed city, and a
+         * free orbital body. Each must put a ship outside the station and
+         * leave it there. */
+        static const struct { const char *name; uint16_t flags; uint16_t shape; } ports[] = {
+            { "rotating shape 1", 0x60, 1 },
+            { "rotating shape 3", 0x60, 3 },
+            { "rotating other", 0x60, 5 },
+            { "rotating shape 0", 0x60, 0 },
+            { "fixed", 0x20, 3 },
+            { "free", 0x00, 3 }
+        };
+        fe2_object *found[6] = {0, 0, 0, 0, 0, 0};
+        fe2_object *donor = 0;
+        unsigned n, slot;
+        for (slot = 1; slot < FE2_POOL_SLOTS; ++slot) {
+            fe2_object *o = session.objects.records[slot];
+            unsigned kind;
+            if (!o || o->role != 1 || !(o->flags & 0x10u)) continue;
+            if (o->flags & 0x40u) {
+                kind = o->as.body.shape == 1 ? 0u : o->as.body.shape == 3 ? 1u :
+                       o->as.body.shape != 0 ? 2u : 3u;
+                if (!donor) donor = o;
+            } else if (o->flags & 0x20u) {
+                kind = 4u;
+            } else {
+                kind = 5u;
+            }
+            if (!found[kind]) found[kind] = o;
+        }
+        assert(donor && found[4] && found[5]);
+        for (n = 0; n < 4; ++n) if (!found[n]) found[n] = donor;
+        for (n = 0; n < sizeof ports / sizeof ports[0]; ++n) {
+            fe2_object *station = found[n];
+            uint16_t saved_flags = station->flags, saved_shape = station->as.body.shape;
+            uint16_t saved_radius = station->as.body.radius_class;
+            uint8_t saved_door = station->as.body.docking_state;
+            uint16_t saved_progress = station->as.body.progress;
+            int synthesize = station == donor &&
+                (((station->flags & 0x60u) != ports[n].flags) || station->as.body.shape != ports[n].shape);
+            uint16_t seen_model[FE2_POOL_SLOTS];
+            uint32_t seen_pos[FE2_POOL_SLOTS];
+            uint16_t seen_status[FE2_POOL_SLOTS];
+            fe2_object *ship = 0;
+            unsigned ship_slot = 0, launched = 0, tries;
+            int linked = (ports[n].flags & 0x20u) != 0;
+            int trickle = (ports[n].flags & 0x40u) != 0;
+            int64_t clearance = 0;
+            memset(seen_model, 0, sizeof seen_model);
+            memset(seen_pos, 0, sizeof seen_pos);
+            memset(seen_status, 0, sizeof seen_status);
+            for (slot = 1; slot < FE2_POOL_SLOTS; ++slot) {
+                fe2_object *o = session.objects.records[slot];
+                seen_status[slot] = session.objects.status[slot];
+                if (o) { seen_model[slot] = o->model; seen_pos[slot] = o->position_low[0]; }
+            }
+            if (synthesize) {
+                station->flags = (uint16_t)((saved_flags & ~0x60u) | ports[n].flags | 0x10u);
+                station->as.body.shape = ports[n].shape;
+            }
+            station->as.body.radius_class = trickle ? 16u : 1u;
+            station->as.body.docking_state = 0;
+            station->as.body.docking_claim = 0;
+            station->as.body.docking_timer = 0;
+            station->as.body.progress = trickle ? 0xffffu : 0;
+            session.resident.police_station = station;
+            session.resident.launch_phase = 0;
+            session.metadata[15].flags = (uint8_t)(session.metadata[15].flags | 1u);
+            for (tries = 0; tries < (trickle ? 80u : 1u) && !ship; ++tries) {
+                session.overlays[15].coarse_tick(session.overlays[15].context, &session, 1);
+                assert(!session.error);
+                for (slot = 1; slot < FE2_POOL_SLOTS; ++slot) {
+                    fe2_object *o = session.objects.records[slot];
+                    if (!o || o->role != 11 || !session.objects.status[slot] ||
+                        (session.objects.status[slot] & FE2_SLOT_REUSABLE)) continue;
+                    if (seen_status[slot] && !(seen_status[slot] & FE2_SLOT_REUSABLE) &&
+                        seen_model[slot] == o->model && seen_pos[slot] == o->position_low[0]) continue;
+                    ship = o;
+                    ship_slot = slot;
+                    ++launched;
+                }
+            }
+            assert(ship);
+            clearance = station_clearance(ship, station, linked);
+            printf("Port %s (%s): %u ships, clearance %lld, behaviour %02x\n",
+                ports[n].name, station->name, launched, (long long)clearance, ship->behaviour);
+            assert(clearance > 1000);
+            for (i = 0; i < 400; ++i) frame();
+            printf("  flying: behaviour %02x door %02x scalar %u\n",
+                ship->behaviour, station->as.body.docking_state, station->cargo_type);
+            assert(session.objects.records[ship_slot] == ship);
+            assert(session.objects.status[ship_slot] &&
+                   !(session.objects.status[ship_slot] & FE2_SLOT_REUSABLE));
+            assert(ship->model != 0xbc && ship->behaviour != 0x64);
+            /* A batch waits in the bay until the door scalar reaches zero and
+             * the state becomes 0xfe. The scalar has to be moving. */
+            if (!trickle && ship->behaviour == 0x7c) {
+                assert(station->as.body.docking_state == 0xff ||
+                       station->as.body.docking_state == 0xfe ||
+                       station->as.body.docking_state == 0);
+                assert(station->cargo_type < 0xffffu);
+            }
+            station->flags = saved_flags;
+            station->as.body.shape = saved_shape;
+            station->as.body.radius_class = saved_radius;
+            station->as.body.docking_state = saved_door;
+            station->as.body.progress = saved_progress;
+        }
         fe2_render_runtime_destroy(runtime); return 0;
     }
     if (argc > 2 && !strcmp(argv[2], "police")) {

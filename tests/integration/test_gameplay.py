@@ -76,6 +76,16 @@ class NativeGameplay(unittest.TestCase):
         self.assertIn('beams', result.stdout)
         self.assertIn('Comms wrap', result.stdout)
 
+    def test_police_launch_from_each_station(self):
+        result = subprocess.run([str(self.check), '0x101', 'ports'], text=True,
+                                capture_output=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for port in ('rotating shape 1', 'rotating shape 3', 'rotating other',
+                     'rotating shape 0', 'fixed', 'free'):
+            self.assertIn('Port ' + port + ':', result.stdout)
+            self.assertIn('flying:', result.stdout)
+        print(result.stdout, end='')
+
     def test_police_launch(self):
         result = subprocess.run([str(self.check), '1', 'police'], text=True, capture_output=True, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

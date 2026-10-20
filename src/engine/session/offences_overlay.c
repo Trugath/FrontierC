@@ -90,13 +90,19 @@ static void route_message(void *opaque, uint16_t text, const fe2_call_args *args
 /* market (overlay 0x38, +0x20) with BX = 9: the slot vector of the source in
  * parameter 9 for the attempt in parameter 7. AL is not set (0 here); the
  * slot vector does not read it. */
-static void route_prepare_child(void *opaque, const fe2_call_args *args)
+static void route_prepare_child(void *opaque, fe2_call_args *args)
 {
     fe2_session_offences_overlay *b = opaque;
     fe2_session *s = b->session;
-    fe2_call_args work = *args;
+    fe2_call_args work;
+    if (!args) return;
+    work = *args;
     if (!s->calls.market) { offences_host_prepare_child(opaque, args); return; }
     offences_out(b); (void)s->calls.market(FE2_OVERLAY_CONTEXT(s, 7), MARKET_SLOT_VECTOR, 0, &work, 0); offences_back(b);
+    /* The slot offset comes back in this block. Creation reads the caller's
+     * arguments, so a copy that is thrown away leaves the ship at the kind
+     * byte (inside the station). */
+    *args = work;
 }
 /* people (overlay 0x58, +0x20): the creation with parameter 7 = 5. */
 static fe2_object *route_create_object(void *opaque, const fe2_call_args *args)

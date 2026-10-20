@@ -56,7 +56,7 @@ static void offences_host_select_music(void *opaque, uint16_t p0)
     if (!binding_->host.select_music) return;
     offences_out(binding_); binding_->host.select_music(binding_->host.opaque, p0); offences_back(binding_);
 }
-static void offences_host_prepare_child(void *opaque, const fe2_call_args * p0)
+static void offences_host_prepare_child(void *opaque, fe2_call_args * p0)
 {
     fe2_session_offences_overlay *binding_ = opaque;
     if (!binding_->host.prepare_child) return;

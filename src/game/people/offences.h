@@ -92,9 +92,10 @@ typedef struct fe2_offence_services {
     void (*play_effect)(void *opaque, uint16_t effect);
     void (*check_music)(void *opaque);
     void (*select_music)(void *opaque, uint16_t track);
-    /* market reference service 9 (BX): prepare a child of the object in
-     * parameter 9; parameter 0 the kind, 7 the attempt. */
-    void (*prepare_child)(void *opaque, const fe2_call_args *args);         /* market */
+    /* market reference service 9 (BX): the slot offset of the object in
+     * parameter 9, for the attempt in parameter 7, comes back in
+     * parameters 0..5. Parameter 0 goes in as the kind and is replaced. */
+    void (*prepare_child)(void *opaque, fe2_call_args *args);               /* market */
     /* people creation (parameter 7 = 5): the new object, or null. */
     fe2_object *(*create_object)(void *opaque, const fe2_call_args *args);  /* people */
     void (*format_table_text)(void *opaque, uint16_t selector, const fe2_text_table *table,
