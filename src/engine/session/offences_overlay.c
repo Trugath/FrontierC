@@ -5,13 +5,26 @@
 
 #include "offences_overlay.h"
 #include "station_overlay.h"
+#include "market_overlay.h"
 #include <string.h>
 
 enum { OFFENCES_SLOT = 15, SUBJECT_PARAMETER = 9, MARKET_SLOT_VECTOR = 9 };
 
 /* ---- The shared globals ------------------------------------------------ */
 #include "offences_resident.h"
-static void load(fe2_session_offences_overlay *b) { offences_resident_load(b->session, &b->objects->state, &b->state); }
+static void load(fe2_session_offences_overlay *b)
+{
+    fe2_session *s = b->session;
+    fe2_session_market_overlay *market;
+    offences_resident_load(s, &b->objects->state, &b->state);
+    /* Customs reads the system's trade codes and the ship's hold. The law
+     * level is the market profile word, not the saved image of that word. */
+    b->state.trade_codes = &s->resident.trade_codes_0;
+    b->state.cargo = b->objects->state.cargo;
+    market = s->overlays[7].context;
+    if (market && s->overlays[7].context == s->calls.context[7])
+        b->state.law_level = fe2_market_profile_word(&market->state);
+}
 static void store(fe2_session_offences_overlay *b)
 {
     offences_resident_store(b->session, &b->objects->state, &b->state);

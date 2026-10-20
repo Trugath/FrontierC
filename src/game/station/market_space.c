@@ -80,6 +80,11 @@ void fe2_market_set_profile_word(fe2_market_state *s, uint16_t value)
     fe2_market_set_word(s, FE2_PROFILE_WORD_AT, value);
 }
 
+uint16_t fe2_market_profile_word(const fe2_market_state *s)
+{
+    return fe2_market_word(s, FE2_PROFILE_WORD_AT);
+}
+
 uint16_t fe2_market_summary(const fe2_market_state *s, unsigned field)
 {
     return fe2_market_word(s, FE2_SUMMARY_AT + field);

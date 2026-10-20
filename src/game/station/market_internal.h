@@ -28,6 +28,7 @@ void fe2_market_set_timed(fe2_market_state *s, unsigned record, unsigned field, 
 uint32_t fe2_market_history(const fe2_market_state *s, unsigned age);
 void fe2_market_set_history(fe2_market_state *s, unsigned age, uint32_t value);
 void fe2_market_set_profile_word(fe2_market_state *s, uint16_t value);
+uint16_t fe2_market_profile_word(const fe2_market_state *s);
 /* Low-word stores into a draft dword keep its high word. */
 void fe2_market_set_low(uint32_t *field, uint16_t value);
 

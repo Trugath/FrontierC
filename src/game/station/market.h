@@ -153,6 +153,8 @@ typedef struct fe2_market_services {
                           fe2_text_out *out);
 } fe2_market_services;
 
+/* The market profile word: the system's law level, among its other fields. */
+uint16_t fe2_market_profile_word(const fe2_market_state *state);
 /* 0x6e: AL=1 starts a game: clear history, collect stations, set up markets. */
 void fe2_market_initialize(fe2_market_state *state, const fe2_market_services *game,
                            uint8_t request);
