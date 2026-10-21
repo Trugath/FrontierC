@@ -1,25 +1,38 @@
-"""Native intro-to-world handoff and real-resource flight integration."""
-import subprocess
+"""Headless gameplay checks.
+
+The game is built once. Each test runs gameplay-check with a scenario name
+from tests/gameplay/.
+"""
 import os
+import re
 import shutil
-import tempfile
-import unittest
+import subprocess
 import sys
+import tempfile
 import time
+import unittest
 from pathlib import Path
 
 from build_native_intro import build, ROOT
-
+from build_native_viewer import assets
 from compiler import windows_executable_inputs, zig
+
 ZIG = zig()
 
 
-class NativeGameplay(unittest.TestCase):
+class Gameplay(unittest.TestCase):
+    exe = None
+    check = None
+
     @classmethod
     def setUpClass(cls):
+        if Gameplay.exe is not None:
+            cls.exe = Gameplay.exe
+            cls.check = Gameplay.check
+            return
         directory = ROOT / 'build/game'
-        cls.exe = build(directory, ZIG, game=True)
-        cls.check = directory / 'gameplay-check.exe'
+        Gameplay.exe = build(directory, ZIG, game=True)
+        assets(directory)
         libraries = [directory / folder / ('libfe2' + part + '.a') for folder, part in
                      [('render', 'render'), ('session', 'session'), ('adlib', 'adlib'),
                       ('position', 'position'), ('contact', 'contact'), ('scene-probe', 'scene_probe')]]
@@ -28,144 +41,92 @@ class NativeGameplay(unittest.TestCase):
         audio.append(ROOT / 'src/engine/audio/roland/roland.c')
         audio.extend(ROOT / 'src/engine/audio/speaker' / name for name in
                      ('speaker_player.c', 'speaker_services.c', 'speaker_tables.c'))
+        checks = [ROOT / 'tests/native_gameplay_check.c', *sorted((ROOT / 'tests/gameplay').glob('*.c'))]
         libs = ['-lwinmm'] if sys.platform == 'win32' else ['-lasound', '-pthread']
+        Gameplay.check = directory / 'gameplay-check.exe'
         subprocess.run([str(ZIG), 'cc', '-std=c99', '-g', '-O0', '-Wall', '-Wextra', '-Werror', '-pedantic',
                         '-I', str(directory), '-I', str(ROOT / 'src/game'),
                         '-I', str(ROOT / 'src/engine'), '-I', str(ROOT / 'src/engine/host'),
-                        str(ROOT / 'tests/native_gameplay_check.c'),
-                        *map(str, audio), *map(str, libraries),
+                        '-I', str(ROOT / 'tests'),
+                        *map(str, checks), *map(str, audio), *map(str, libraries),
                         *windows_executable_inputs(ZIG, directory), *libs,
-                        '-o', str(cls.check)], check=True)
+                        '-o', str(Gameplay.check)], check=True)
+        cls.exe = Gameplay.exe
+        cls.check = Gameplay.check
 
-    def test_intro_to_game(self):
-        result = subprocess.run([str(self.exe), '--frames', '120'], text=True,
-                                capture_output=True, timeout=60, check=True)
-        self.assertIn('started selection=1', result.stdout)
-        self.assertIn('frames=120 errors=0', result.stdout)
-        # Highest detail preset (1FD1h = 1, 1FD3h = 2) submits the nearer bodies.
-        self.assertIn('game=1 bodies=7 scenes=110 submitted=654', result.stdout)
-
-    def test_scanner_marker_provider(self):
-        result = subprocess.run([str(self.check), '1', 'scanner'], text=True, capture_output=True, timeout=60)
+    def scenario(self, selection, mode=None, timeout=60, cwd=None, extra=()):
+        command = [str(self.check), str(selection)]
+        if mode:
+            command.append(mode)
+        command.extend(extra)
+        result = subprocess.run(command, text=True, capture_output=True, timeout=timeout, cwd=cwd)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Scanner: stems, caps, colour, clipping and preservation passed', result.stdout)
+        return result
 
+
+class FlightChecks(Gameplay):
     def test_flight_and_starting_configurations(self):
         for selection in (1, 0x101, 0x201, 0x401, 0x501):
             with self.subTest(selection=hex(selection)):
-                result = subprocess.run([str(self.check), str(selection)], text=True,
-                                        capture_output=True, timeout=60)
-                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                result = self.scenario(selection)
                 self.assertIn('Population:', result.stdout)
-                print(result.stdout, end='')
 
     def test_repeated_intro_then_flight(self):
-        result = subprocess.run([str(self.check), '1', 'intro'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        print(result.stdout, end='')
+        self.scenario(1, 'intro')
 
     def test_offence_keeps_the_view(self):
-        result = subprocess.run([str(self.check), '0x101', 'view'], text=True,
-                                capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.scenario(0x101, 'view')
         self.assertIn('Launch clearance:', result.stdout)
         self.assertIn('Left without permission:', result.stdout)
-        print(result.stdout, end='')
-        result = subprocess.run([str(self.check), '1', 'fire'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_firing_and_comms(self):
+        result = self.scenario(1, 'fire')
         self.assertIn('beams', result.stdout)
         self.assertIn('Comms wrap', result.stdout)
 
-    def test_status_spawn_clears_the_source(self):
-        result = subprocess.run([str(self.check), '0x101', 'spawn'], text=True,
-                                capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Canister ', result.stdout)
-        self.assertIn('Company:', result.stdout)
-        print(result.stdout, end='')
-
-    def test_police_launch_from_each_station(self):
-        result = subprocess.run([str(self.check), '0x101', 'ports'], text=True,
-                                capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        for port in ('rotating shape 1', 'rotating shape 3', 'rotating other',
-                     'rotating shape 0', 'fixed', 'free'):
-            self.assertIn('Port ' + port + ':', result.stdout)
-            self.assertIn('flying:', result.stdout)
-        print(result.stdout, end='')
-
-    def test_police_launch(self):
-        result = subprocess.run([str(self.check), '1', 'police'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Police launch', result.stdout)
-        self.assertIn('Police patrol', result.stdout)
-        for phase in ('Interception', 'Escort', 'Hold', 'Leaving', 'Removal'):
-            self.assertIn(phase, result.stdout)
-        print(result.stdout, end='')
+    def test_scanner_marker_provider(self):
+        result = self.scenario(1, 'scanner')
+        self.assertIn('Scanner: stems, caps, colour, clipping and preservation passed', result.stdout)
 
     def test_pointer_launch_and_comms(self):
-        result = subprocess.run([str(self.check), '1', 'hud'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.scenario(1, 'hud')
         self.assertIn('HUD icon pixel 44', result.stdout)
         self.assertIn('Secondary steer', result.stdout)
-        print(result.stdout, end='')
 
+    def test_space_dust_while_flying_straight(self):
+        result = self.scenario(1, 'dust')
+        self.assertIn('Space dust:', result.stdout)
+
+    def test_views_with_held_turn_keys(self):
+        self.scenario(1, 'views')
+
+    def test_planet_impact_crashes(self):
+        result = self.scenario(1, 'crash')
+        self.assertIn('slow landing kept hull', result.stdout)
+        self.assertIn('fast impact explosions', result.stdout)
+        self.assertIn('Wreck smoke', result.stdout)
+
+
+class StationChecks(Gameplay):
     def test_station_screens(self):
-        result = subprocess.run([str(self.check), '1', 'station'], text=True, capture_output=True, timeout=120)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        for phase in ('Station portrait:', 'Market', 'Bought', 'Sold', 'Equipment fitted', 'Deluxe service', 'Service:', 'Bulletin board', 'Advert', 'Fitting', 'Ships for sale', 'Launch',
+        result = self.scenario(1, 'station', timeout=120)
+        for phase in ('Station portrait:', 'Market', 'Bought', 'Sold', 'Equipment fitted', 'Deluxe service',
+                      'Service:', 'Bulletin board', 'Advert', 'Fitting', 'Ships for sale', 'Launch',
                       'Lift-off', 'Text failures: 0'):
             self.assertIn(phase, result.stdout)
-        print(result.stdout, end='')
 
     def test_shipyard_purchase(self):
-        result = subprocess.run([str(self.check), '1', 'shipyard'], text=True, capture_output=True, timeout=120)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.scenario(1, 'shipyard', timeout=120)
         for phase in ('Ship offer', 'Ship preview:', 'Ship bought', 'Launch with the new ship'):
             self.assertIn(phase, result.stdout)
-        print(result.stdout, end='')
 
-    def test_hyperspace_jump(self):
-        result = subprocess.run([str(self.check), '1', 'jump'], text=True, capture_output=True, timeout=180)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        for phase in ('Departure', 'Target: BD 4523', 'Arrival: BD 4523'):
-            self.assertIn(phase, result.stdout)
-        print(result.stdout, end='')
-
-    def test_commander_files(self):
-        with tempfile.TemporaryDirectory(prefix='fe2-commander-') as d:
-            result = subprocess.run([str(self.check), '1', 'commander'], text=True, capture_output=True,
-                                    timeout=180, cwd=d)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        for phase in ('Save dialog:', 'Saved: JAMESON._01', 'Loaded: restarts 1', 'position restored', 'Image again',
-                      'Saved again', 'Flying on', 'Opaque commander bytes preserved',
-                      'Save overwrite dismissed', 'Service counters restored'):
-            self.assertIn(phase, result.stdout)
-        print(result.stdout, end='')
-        original = os.environ.get('FE2_ORIGINAL_COMMANDER')
-        if original:
-            with tempfile.TemporaryDirectory(prefix='fe2-original-commander-') as directory:
-                local = Path(directory) / 'ORIGINAL._01'
-                shutil.copyfile(Path(original).resolve(), local)
-                command = [str(self.check), '1', 'original', str(local)]
-                exported = os.environ.get('FE2_NATIVE_COMMANDER_OUTPUT')
-                if exported:
-                    command.append(str(Path(exported).resolve()))
-                result = subprocess.run(command, text=True, capture_output=True, timeout=180, cwd=directory)
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertIn('Original commander continued for 120 native frames', result.stdout)
-            print(result.stdout, end='')
-
-    def test_parcel_delivery(self):
-        result = subprocess.run([str(self.check), '1', 'deliver'], text=True, capture_output=True, timeout=180)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Parcel delivered:', result.stdout)
-        print(result.stdout, end='')
+    def test_station_mission(self):
+        result = self.scenario(0x201, 'mission', timeout=120)
+        self.assertIn('Mission offer', result.stdout)
+        self.assertIn('Mission taken', result.stdout)
 
     def test_gameplay_loops(self):
-        result = subprocess.run([str(self.check), str(0x201), 'loops'], text=True, capture_output=True,
-                                timeout=180)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.scenario(0x201, 'loops', timeout=180)
         for phase in ('Trading:', 'Bought', 'Sold',
                       'Mission requests keep a stale selector high word',
                       'Mission taken',
@@ -174,36 +135,49 @@ class NativeGameplay(unittest.TestCase):
                       'Mining compaction',
                       'Mining hopper signed compare'):
             self.assertIn(phase, result.stdout)
-        print(result.stdout, end='')
 
-    def test_station_mission(self):
-        result = subprocess.run([str(self.check), str(0x201), 'mission'], text=True, capture_output=True,
-                                timeout=120)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Mission offer', result.stdout)
-        self.assertIn('Mission taken', result.stdout)
-        print(result.stdout, end='')
+    def test_parcel_delivery(self):
+        result = self.scenario(1, 'deliver', timeout=180)
+        self.assertIn('Parcel delivered:', result.stdout)
 
-    def test_space_dust_while_flying_straight(self):
-        result = subprocess.run([str(self.check), '1', 'dust'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Space dust:', result.stdout)
-        print(result.stdout, end='')
+    def test_status_spawn_clears_the_source(self):
+        result = self.scenario(0x101, 'spawn')
+        self.assertIn('Canister ', result.stdout)
+        self.assertIn('Company:', result.stdout)
 
-    def test_ship_information_all_starts(self):
+    def test_police_launch(self):
+        result = self.scenario(1, 'police')
+        self.assertIn('Police launch', result.stdout)
+        self.assertIn('Police patrol', result.stdout)
+        for phase in ('Interception', 'Escort', 'Hold', 'Leaving', 'Removal'):
+            self.assertIn(phase, result.stdout)
+
+    def test_police_launch_from_each_station(self):
+        result = self.scenario(0x101, 'ports')
+        for port in ('rotating shape 1', 'rotating shape 3', 'rotating other',
+                     'rotating shape 0', 'fixed', 'free'):
+            self.assertRegex(result.stdout, r'(?m)^Port ' + re.escape(port) + r' \([^)]+\): ')
+        self.assertIn('flying:', result.stdout)
+
+    def test_lave_departure(self):
+        result = self.scenario(0x201, 'lave')
+        self.assertIn('Lave departure:', result.stdout)
+
+
+class NavigationChecks(Gameplay):
+    def test_orbital_navigation(self):
         for selection in (1, 0x101, 0x201, 0x401, 0x501):
             with self.subTest(selection=hex(selection)):
-                result = subprocess.run([str(self.check), str(selection), 'shipinfo'], text=True,
-                                        capture_output=True, timeout=60)
-                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertEqual(result.stdout.count('Ship information page'), 8)
-                self.assertIn('Refuelled:', result.stdout)
-                self.assertIn('Engines restored', result.stdout)
-                self.assertIn('Customs:', result.stdout)
+                result = self.scenario(selection, 'navigation')
+                self.assertIn('Navigation controls and return to flight passed', result.stdout)
+
+    def test_hyperspace_jump(self):
+        result = self.scenario(1, 'jump', timeout=180)
+        for phase in ('Departure', 'Target: BD 4523', 'Arrival: BD 4523'):
+            self.assertIn(phase, result.stdout)
 
     def test_map_and_phone(self):
-        result = subprocess.run([str(self.check), '1', 'screens'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.scenario(1, 'screens')
         self.assertIn('Galactic map:', result.stdout)
         self.assertIn('Commander status:', result.stdout)
         self.assertIn('Status preview:', result.stdout)
@@ -214,54 +188,65 @@ class NativeGameplay(unittest.TestCase):
         self.assertIn('Phone flight:', result.stdout)
         self.assertIn('Icon clicks:', result.stdout)
         self.assertNotIn('Text expansion failed 98', result.stderr)
-        print(result.stdout, end='')
 
-    def test_orbital_navigation(self):
+
+class CommanderChecks(Gameplay):
+    def test_commander_files(self):
+        with tempfile.TemporaryDirectory(prefix='fe2-commander-') as directory:
+            result = self.scenario(1, 'commander', timeout=180, cwd=directory)
+        for phase in ('Save dialog:', 'Saved: JAMESON._01', 'Loaded: restarts 1', 'position restored', 'Image again',
+                      'Saved again', 'Flying on', 'Opaque commander bytes preserved',
+                      'Save overwrite dismissed', 'Service counters restored'):
+            self.assertIn(phase, result.stdout)
+        original = os.environ.get('FE2_ORIGINAL_COMMANDER')
+        if original:
+            with tempfile.TemporaryDirectory(prefix='fe2-original-commander-') as directory:
+                local = Path(directory) / 'ORIGINAL._01'
+                shutil.copyfile(Path(original).resolve(), local)
+                extra = [str(local)]
+                exported = os.environ.get('FE2_NATIVE_COMMANDER_OUTPUT')
+                if exported:
+                    extra.append(str(Path(exported).resolve()))
+                result = self.scenario(1, 'original', timeout=180, cwd=directory, extra=extra)
+            self.assertIn('Original commander continued for 120 native frames', result.stdout)
+
+    def test_ship_information_all_starts(self):
         for selection in (1, 0x101, 0x201, 0x401, 0x501):
             with self.subTest(selection=hex(selection)):
-                result = subprocess.run([str(self.check), str(selection), 'navigation'],
-                                        text=True, capture_output=True, timeout=60)
-                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertIn('Navigation controls and return to flight passed', result.stdout)
-                print(result.stdout, end='')
-
-    def test_exit_scene_to_intro(self):
-        result = subprocess.run([str(self.check), '1', 'exit'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('returned to intro', result.stdout)
+                result = self.scenario(selection, 'shipinfo')
+                self.assertEqual(result.stdout.count('Ship information page'), 8)
+                self.assertIn('Refuelled:', result.stdout)
+                self.assertIn('Engines restored', result.stdout)
+                self.assertIn('Customs:', result.stdout)
 
     def test_preferences_pointer_controls(self):
-        result = subprocess.run([str(self.check), '1', 'ui'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.scenario(1, 'ui')
         self.assertIn('UI: preferences open', result.stdout)
         self.assertIn('Preferences: backdrop', result.stdout)
 
+
+class SceneChecks(Gameplay):
     def test_scene_orchestration(self):
-        result = subprocess.run([str(self.check), '1', 'scene'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.scenario(1, 'scene')
         self.assertIn('four attachment branches and frame model passed', result.stdout)
 
     def test_far_object_projection(self):
-        result = subprocess.run([str(self.check), '1', 'far'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.scenario(1, 'far')
         self.assertIn('stale projection invalidation passed', result.stdout)
 
-    def test_lave_departure(self):
-        result = subprocess.run([str(self.check), str(0x201), 'lave'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Lave departure:', result.stdout)
+    def test_exit_scene_to_intro(self):
+        result = self.scenario(1, 'exit')
+        self.assertIn('returned to intro', result.stdout)
 
-    def test_planet_impact_crashes(self):
-        result = subprocess.run([str(self.check), '1', 'crash'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('slow landing kept hull', result.stdout)
-        self.assertIn('fast impact explosions', result.stdout)
-        self.assertIn('Wreck smoke', result.stdout)
-        print(result.stdout, end='')
 
-    def test_views_with_held_turn_keys(self):
-        result = subprocess.run([str(self.check), '1', 'views'], text=True, capture_output=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+class GameLaunch(Gameplay):
+    def test_intro_to_game(self):
+        result = subprocess.run([str(self.exe), '--frames', '120'], text=True,
+                                capture_output=True, timeout=60, check=True)
+        self.assertIn('started selection=1', result.stdout)
+        self.assertIn('frames=120 errors=0', result.stdout)
+        # Highest detail preset (1FD1h = 1, 1FD3h = 2) submits the nearer bodies.
+        self.assertIn('game=1 bodies=7 scenes=110 submitted=654', result.stdout)
 
     @unittest.skipUnless(sys.platform == 'win32' and os.environ.get('FE2_WINDOW_TESTS') == '1',
                          'Set FE2_WINDOW_TESTS=1 to test a visible Win32 window')
@@ -309,7 +294,6 @@ class NativeGameplay(unittest.TestCase):
             self.assertIn('game=1 bodies=7', stdout)
             self.assertNotIn('flight mode=60', stdout)
             self.assertNotIn('throttle=0\n', stdout)
-            print('Win32: intro selection, F7 takeoff, held Enter throttle, Escape pause/preferences and audio shutdown passed')
         finally:
             if process.poll() is None:
                 process.kill()

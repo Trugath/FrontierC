@@ -21,19 +21,20 @@ The suite contains:
   and wrapped system-record storage.
 - Standalone native checks for PC speaker effects, all supported Roland effect
   selections and music tracks, and setup-check failure paths and sound choices.
-- Headless gameplay checks for starts, flight, contacts, police, navigation,
-  views, scanner/HUD, trading, fitting, ship purchases, missions, jumps,
-  commander save/load, preferences and renderer state. One check runs a
-  trading, mission, flight and mining loop and locks the assembly defects
-  those paths still have. A separate model-viewer check verifies
-  deterministic frame rendering and textured rendering.
+- Headless gameplay checks. `tests/native_gameplay_check.c` boots the session
+  and `tests/gameplay/` holds one file per subject: flight, navigation,
+  station, commander, and screens. `tests/integration/test_gameplay.py` groups
+  the same subjects. One station check runs a trading, mission, flight and
+  mining loop and locks the assembly defects those paths still have. A separate
+  model-viewer check verifies deterministic frame rendering and textured rendering.
+- Reported defects in `tests/reported_bugs.c`, with the Imperial crew counts
+  checked from the ship table in `tests/test_reported_bugs.py`.
 - A naming regression audit and a compilation inventory that rejects retained
   C sources omitted from the native build/test targets.
 
 Native test executables explicitly enable C assertions. Game libraries compile
-with `-Wall -Wextra -Werror -pedantic`. The Windows window-input test requires
-`FE2_WINDOW_TESTS=1`; ordinary integration runs are headless.
+with `-Wall -Wextra -Werror -pedantic`. The visible window-input test requires
+Windows and `FE2_WINDOW_TESTS=1`. Ordinary integration runs are headless and
+run on Linux and Windows.
 
 These checks are not a measured claim of 100% line or branch coverage.
-Validation in this workspace was run on Windows; Linux execution has not been
-verified here.

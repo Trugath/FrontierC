@@ -59,20 +59,24 @@ def main():
     write_blob(directory / 'input_blob.h', 'fe2_test_input', input_tables_c.translation())
     write_blob(directory / 'pointer_blob.h', 'fe2_test_pointer', pointer_tables_c.image())
     write_blob(directory / 'mining_blob.h', 'fe2_test_mining', mining_tables_c.record())
+    def compile_native(name, sources, includes, defines=()):
+        output = directory / (name + ('.exe' if sys.platform == 'win32' else ''))
+        subprocess.run([str(zig()), 'cc', '-std=c99', '-O1', '-g', '-Wall', '-Wextra', '-Werror', '-pedantic',
+                        '-UNDEBUG', *[f'-D{item}' for item in defines], *[f'-I{path}' for path in includes],
+                        *map(str, sources), *windows_executable_inputs(zig(), directory),
+                        '-o', str(output)], check=True)
+        subprocess.run([str(output)], check=True)
+        return sources
+
     sources = [ROOT / 'tests/native_tests.c', ROOT / 'src/engine/game/call_args.c',
-               ROOT / 'src/game/world/system_lookup.c', ROOT / 'src/game/world/system_record.c', ROOT / 'src/game/world/catalogue_tables.c',
-               directory / 'math3_tables.c']
+               ROOT / 'src/game/world/system_lookup.c', ROOT / 'src/game/world/system_record.c',
+               ROOT / 'src/game/world/catalogue_tables.c', directory / 'math3_tables.c']
     sources += sorted((ROOT / 'src/game/mining').glob('*.c'))
     sources += sorted((ROOT / 'src/engine/math').glob('*.c'))
     sources += sorted((ROOT / 'src/engine/input').glob('*.c'))
     sources += sorted((ROOT / 'src/engine/pointer').glob('*.c'))
-    exe = directory / ('native-tests.exe' if sys.platform == 'win32' else 'native-tests')
-    subprocess.run([str(zig()), 'cc', '-std=c99', '-O1', '-g', '-Wall', '-Wextra',
-                    '-Werror', '-pedantic', '-UNDEBUG', '-I' + str(ROOT / 'src/engine'),
-                    '-I' + str(ROOT / 'src/game'),                     '-I' + str(ROOT / 'src/engine/math'), '-I' + str(directory),
-                    *map(str, sources), *windows_executable_inputs(zig(), directory),
-                    '-o', str(exe)], check=True)
-    subprocess.run([str(exe)], check=True)
+    behavior_includes = [ROOT / 'src/engine', ROOT / 'src/game', ROOT / 'src/engine/math', directory]
+    sources = compile_native('native-tests', sources, behavior_includes)
     import status_tables_c
     import market_tables_c
     from market_resources_c import resources as market_resources
@@ -85,13 +89,8 @@ def main():
         ROOT / 'src/game/commander/contracts.c', ROOT / 'src/game/commander/page_layout.c',
         ROOT / 'src/game/station/commodity_prices.c', ROOT / 'src/game/station/market_space.c',
         ROOT / 'src/game/station/market_tables.c', ROOT / 'src/game/world/drive_query.c']
-    reported = directory / ('reported-bugs.exe' if sys.platform == 'win32' else 'reported-bugs')
-    subprocess.run([str(zig()), 'cc', '-std=c99', '-O1', '-g', '-Wall', '-Wextra',
-                    '-Werror', '-pedantic', '-UNDEBUG', '-I' + str(ROOT / 'src/engine'),
-                    '-I' + str(ROOT / 'src/game'), '-I' + str(directory),
-                    *map(str, reported_sources), *windows_executable_inputs(zig(), directory),
-                    '-o', str(reported)], check=True)
-    subprocess.run([str(reported)], check=True)
+    reported_sources = compile_native('reported-bugs', reported_sources,
+                                      [ROOT / 'src/engine', ROOT / 'src/game', directory])
     import optional_tables_c
     optional_tables_c.speaker(directory / 'speaker_tables.h')
     optional_tables_c.setup(directory / 'setup_tables.h')
@@ -104,17 +103,11 @@ def main():
     for folder in ('speaker', 'roland'):
         optional_sources += sorted((ROOT / 'src/engine/audio' / folder).glob('*.c'))
     optional_sources += sorted((ROOT / 'src/game/setup').glob('*.c'))
-    optional_exe = directory / ('optional-tests.exe' if sys.platform == 'win32' else 'optional-tests')
-    windows_inputs = windows_executable_inputs(zig(), directory)
-    subprocess.run([str(zig()), 'cc', '-std=c99', '-O1', '-g', '-UNDEBUG',
-                    *(['-DFE2_ROLAND_EMBEDDED'] if embed_midi else []),
-                    '-Wall', '-Wextra', '-Werror', '-pedantic', '-I' + str(ROOT / 'src/game'),
-                    '-I' + str(ROOT / 'src/engine'), '-I' + str(directory),
-                    *map(str, optional_sources), *windows_inputs,
-                    '-o', str(optional_exe)], check=True)
-    subprocess.run([str(optional_exe)], check=True)
-    recorded = list(sources + optional_sources)
-    recorded.extend(Path(path) for path in windows_inputs if str(path).endswith('.c'))
+    optional_sources = compile_native(
+        'optional-tests', optional_sources, [ROOT / 'src/game', ROOT / 'src/engine', directory],
+        ('FE2_ROLAND_EMBEDDED',) if embed_midi else ())
+    recorded = list(sources + reported_sources + optional_sources)
+    recorded.extend(Path(path) for path in windows_executable_inputs(zig(), directory) if str(path).endswith('.c'))
     (directory / 'native-sources.json').write_text(json.dumps({
         'sources': [str(path.relative_to(ROOT)) for path in recorded]
     }, indent=2) + '\n', encoding='utf-8')
