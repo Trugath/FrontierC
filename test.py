@@ -91,6 +91,30 @@ def main():
         ROOT / 'src/game/station/market_tables.c', ROOT / 'src/game/world/drive_query.c']
     reported_sources = compile_native('reported-bugs', reported_sources,
                                       [ROOT / 'src/engine', ROOT / 'src/game', directory])
+    import interaction_text_c
+    interaction_text_c.write_tables(directory / 'interaction_tables.h')
+    contract_sources = [
+        ROOT / 'tests/native_contracts.c', ROOT / 'tests/native_contracts_equipment.c',
+        ROOT / 'src/engine/game/call_args.c',
+        ROOT / 'src/engine/math/contexts.c',
+        ROOT / 'src/engine/pool/equipment_effects.c', ROOT / 'src/engine/pool/pool_visitors.c',
+        ROOT / 'src/engine/render/texture.c', ROOT / 'src/engine/render/geometry.c',
+        ROOT / 'src/engine/render/projection.c', ROOT / 'src/engine/render/scanlines.c',
+        ROOT / 'src/engine/render/spans.c', ROOT / 'src/engine/render/clip.c',
+        ROOT / 'src/game/people/delta_updates.c', ROOT / 'src/game/people/services.c',
+        ROOT / 'src/game/station/interaction_text.c', ROOT / 'src/game/station/commodity_list.c',
+        ROOT / 'src/game/station/market_space.c', ROOT / 'src/game/station/market_update.c',
+        ROOT / 'src/game/commander/mining_page.c', ROOT / 'src/game/commander/passenger_page.c',
+        ROOT / 'src/game/commander/crew_page.c', ROOT / 'src/game/commander/mission_page.c',
+        ROOT / 'src/game/commander/page_layout.c',
+        ROOT / 'src/game/world/stations.c', ROOT / 'src/game/world/generation_random.c',
+        ROOT / 'src/game/world/body_names.c', ROOT / 'src/game/world/profiles.c',
+        ROOT / 'src/game/world/system_record.c']
+    contract_includes = [ROOT / 'src/engine', ROOT / 'src/game', ROOT / 'src/engine/math',
+                         ROOT / 'src/engine/render', ROOT / 'src/engine/pool', ROOT / 'src/game/people',
+                         ROOT / 'src/game/station', ROOT / 'src/game/world',
+                         ROOT / 'src/game/commander', directory]
+    contract_sources = compile_native('native-contracts', contract_sources, contract_includes)
     import optional_tables_c
     optional_tables_c.speaker(directory / 'speaker_tables.h')
     optional_tables_c.setup(directory / 'setup_tables.h')
@@ -106,7 +130,7 @@ def main():
     optional_sources = compile_native(
         'optional-tests', optional_sources, [ROOT / 'src/game', ROOT / 'src/engine', directory],
         ('FE2_ROLAND_EMBEDDED',) if embed_midi else ())
-    recorded = list(sources + reported_sources + optional_sources)
+    recorded = list(sources + reported_sources + contract_sources + optional_sources)
     recorded.extend(Path(path) for path in windows_executable_inputs(zig(), directory) if str(path).endswith('.c'))
     (directory / 'native-sources.json').write_text(json.dumps({
         'sources': [str(path.relative_to(ROOT)) for path in recorded]
