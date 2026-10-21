@@ -205,9 +205,10 @@ static void add_elite_points(fe2_commander_status *status, int32_t delta)
                                 ? status->elite_points - magnitude : 0;
 }
 
-/* Settle one mission; the record is removed before the debriefing. Failed
- * missions always cost imperial rank: the original takes the authority byte
- * from the negative points, which never equals the federal authority. */
+/* Settle one mission; the record is removed before the debriefing. The
+ * points are charged to the mission's navy. The original kept the low byte
+ * of a negative change, which is never the federal authority, so every
+ * failure demoted the Empire. */
 static void debrief(fe2_commander_status *status, const fe2_game_services *game,
                     unsigned index, unsigned type, fe2_call_args *args, mission_result result)
 {
@@ -239,9 +240,8 @@ static void debrief(fe2_commander_status *status, const fe2_game_services *game,
     } else {
         fe2_args_word(args, PARAM_4, 0xffff);
         fe2_args_word(args, PARAM_0, (uint16_t)result.rank_points);
-        authority = (uint8_t)result.rank_points;
+        authority = fe2_status_mission_authority[type];
         if (result.rank_points >= 0) {
-            authority = fe2_status_mission_authority[type];
             permit = fe2_status_mission_permit[type];
             if (result.rank_points == EXCELLENT_FILM_POINTS) ++permit;
             fe2_args_word(args, PARAM_4, (uint16_t)permit);

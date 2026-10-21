@@ -73,6 +73,25 @@ def main():
                     *map(str, sources), *windows_executable_inputs(zig(), directory),
                     '-o', str(exe)], check=True)
     subprocess.run([str(exe)], check=True)
+    import status_tables_c
+    import market_tables_c
+    from market_resources_c import resources as market_resources
+    status_tables_c.write_tables(directory / 'status_tables_data.h')
+    market_tables_c.write_tables(directory / 'market_tables_data.h')
+    write_blob(directory / 'market_blob.h', 'fe2_test_market', market_resources())
+    reported_sources = [
+        ROOT / 'tests/reported_bugs.c', ROOT / 'src/engine/game/call_args.c',
+        ROOT / 'src/game/commander/missions.c', ROOT / 'src/game/commander/military_rank.c',
+        ROOT / 'src/game/commander/contracts.c', ROOT / 'src/game/commander/page_layout.c',
+        ROOT / 'src/game/station/commodity_prices.c', ROOT / 'src/game/station/market_space.c',
+        ROOT / 'src/game/station/market_tables.c', ROOT / 'src/game/world/drive_query.c']
+    reported = directory / ('reported-bugs.exe' if sys.platform == 'win32' else 'reported-bugs')
+    subprocess.run([str(zig()), 'cc', '-std=c99', '-O1', '-g', '-Wall', '-Wextra',
+                    '-Werror', '-pedantic', '-UNDEBUG', '-I' + str(ROOT / 'src/engine'),
+                    '-I' + str(ROOT / 'src/game'), '-I' + str(directory),
+                    *map(str, reported_sources), *windows_executable_inputs(zig(), directory),
+                    '-o', str(reported)], check=True)
+    subprocess.run([str(reported)], check=True)
     import optional_tables_c
     optional_tables_c.speaker(directory / 'speaker_tables.h')
     optional_tables_c.setup(directory / 'setup_tables.h')
