@@ -42,6 +42,7 @@ static uint16_t price(fe2_market_state *s, const fe2_market_services *game, unsi
     const uint16_t *p = &fe2_market_commodity_parameters[commodity * 4];
     fe2_market_draft *d = &s->draft;
     uint16_t value = q15(p[1], factor(fe2_market_population_value_factors, d->lookup));
+    uint16_t result;
     uint32_t product;
 
     value = q15(value, factor(fe2_market_strength_value_factors, d->reward));
@@ -54,7 +55,10 @@ static uint16_t price(fe2_market_state *s, const fe2_market_services *game, unsi
     product = (uint32_t)((int32_t)(int16_t)((game->random(game->opaque, 0) & PRICE_RANDOM_MASK) +
                                             PRICE_RANDOM_BASE) * (int16_t)value);
     if (doubling_overflows(product) || doubling_overflows(product << 1)) return 0x7fff;
-    return (uint16_t)((product << 2) >> 16);
+    result = (uint16_t)((product << 2) >> 16);
+    /* A negative price pays the commander to take the goods away. An export
+     * discount that passes the base price is a zero charge instead. */
+    return result & 0x8000u ? 0 : result;
 }
 
 /* never negative. */
