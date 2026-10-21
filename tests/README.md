@@ -29,6 +29,11 @@ The suite contains:
   model-viewer check verifies deterministic frame rendering and textured rendering.
 - Reported defects in `tests/reported_bugs.c`, with the Imperial crew counts
   checked from the ship table in `tests/test_reported_bugs.py`.
+- Behavior contracts in `tests/native_contracts.c` for the commander pages,
+  price list, daily market update, equipment effects, docking approach,
+  interaction text, render contexts, textured surfaces and generated stations.
+  These checks follow the stated rule. They do not record a defect as the
+  expected result.
 - A naming regression audit and a compilation inventory that rejects retained
   C sources omitted from the native build/test targets.
 
