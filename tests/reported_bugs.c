@@ -12,6 +12,7 @@
 #include "commander/status_internal.h"
 #include "station/market_internal.h"
 #include "chart/galactic_map.h"
+#include "world/hyperspace.h"
 #include "market_blob.h"
 #include "status_tables_data.h"
 
@@ -162,6 +163,56 @@ static void export_prices_are_not_negative(void)
     printf("Export prices are not negative\n");
 }
 
+static fe2_ship_stats hull_of(void *opaque, uint16_t model)
+{
+    fe2_ship_stats stats;
+    (void)opaque; (void)model;
+    stats.hull_mass = 10;
+    stats.drive_limit = 1000;
+    return stats;
+}
+
+/* A jump of 655.36 light years plus a short hop is the long jump. */
+static void far_jump_does_not_wrap(void)
+{
+    fe2_hyperspace_state state;
+    fe2_hyperspace_services game;
+    fe2_drive_class classes[FE2_DRIVE_CLASSES];
+    fe2_object ship;
+    fe2_drive_query query;
+    memset(&state, 0, sizeof state);
+    memset(&game, 0, sizeof game);
+    memset(classes, 0, sizeof classes);
+    memset(&ship, 0, sizeof ship);
+    memset(&query, 0, sizeof query);
+    classes[1].range_factor = 50000;
+    state.drive_classes = classes;
+    state.player_handle = 1;
+    state.hydrogen_fuel = 3;
+    game.ship_stats = hull_of;
+    ship.handle = 1;
+    ship.as.craft.drive = 1;
+
+    query.mode = FE2_DRIVE_PREPARE;
+    query.request = 0;
+    assert(fe2_hyperspace_query(&state, &game, &ship, &query) == FE2_HYPERSPACE_OK);
+    assert(query.mode == 0xffff);
+
+    memset(&query, 0, sizeof query);
+    query.mode = FE2_DRIVE_PREPARE;
+    query.request = 65536u + 100u;
+    assert(fe2_hyperspace_query(&state, &game, &ship, &query) == FE2_HYPERSPACE_OK);
+    assert(query.mode == 0xffff);
+
+    memset(&query, 0, sizeof query);
+    query.mode = FE2_DRIVE_PREPARE;
+    query.request = 100;
+    assert(fe2_hyperspace_query(&state, &game, &ship, &query) == FE2_HYPERSPACE_OK);
+    assert(query.mode == FE2_DRIVE_PREPARE);
+    assert(state.hydrogen_fuel == 3);
+    printf("A far jump does not wrap\n");
+}
+
 /* A second system on the same map position can still be jumped to. */
 static void coincident_systems_can_be_jumped(void)
 {
@@ -176,6 +227,7 @@ int main(void)
     failed_mission_demotes_its_own_navy();
     abandoned_passengers_free_cabins();
     export_prices_are_not_negative();
+    far_jump_does_not_wrap();
     coincident_systems_can_be_jumped();
     return 0;
 }
