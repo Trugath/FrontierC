@@ -213,6 +213,36 @@ static void far_jump_does_not_wrap(void)
     printf("A far jump does not wrap\n");
 }
 
+/* Military fuel becomes radioactives of the same mass. */
+static void military_fuel_keeps_its_cargo(void)
+{
+    fe2_hyperspace_state state;
+    fe2_hyperspace_services game;
+    fe2_drive_class classes[FE2_DRIVE_CLASSES];
+    fe2_object ship;
+    fe2_drive_query query;
+    memset(&state, 0, sizeof state);
+    memset(&game, 0, sizeof game);
+    memset(classes, 0, sizeof classes);
+    memset(&ship, 0, sizeof ship);
+    memset(&query, 0, sizeof query);
+    classes[10].range_factor = 50000;
+    state.drive_classes = classes;
+    state.player_handle = 1;
+    state.military_fuel = 5;
+    state.cargo_used = 5;
+    game.ship_stats = hull_of;
+    ship.handle = 1;
+    ship.as.craft.drive = 10;
+    query.mode = FE2_DRIVE_CONSUME;
+    query.request = 100;
+    assert(fe2_hyperspace_query(&state, &game, &ship, &query) == FE2_HYPERSPACE_OK);
+    assert(query.mode == FE2_DRIVE_CONSUME);
+    assert(state.military_fuel + state.radioactives == 5);
+    assert(state.cargo_used == 5);
+    printf("Military fuel keeps its cargo\n");
+}
+
 /* A second system on the same map position can still be jumped to. */
 static void coincident_systems_can_be_jumped(void)
 {
@@ -228,6 +258,7 @@ int main(void)
     abandoned_passengers_free_cabins();
     export_prices_are_not_negative();
     far_jump_does_not_wrap();
+    military_fuel_keeps_its_cargo();
     coincident_systems_can_be_jumped();
     return 0;
 }
