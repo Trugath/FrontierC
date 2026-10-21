@@ -19,6 +19,7 @@
 void equipment_bits_drive_the_effect(void);
 void fines_follow_the_charge_rules(void);
 void delivery_follows_the_offer(void);
+void fuel_and_shields_follow_the_ship(void);
 #include "people_internal.h"
 #include "interaction_text.h"
 #include "market_internal.h"
@@ -1183,6 +1184,7 @@ int main(void)
     sol_stations_are_copies_of_the_named_templates();
     fines_follow_the_charge_rules();
     delivery_follows_the_offer();
+    fuel_and_shields_follow_the_ship();
     puts("Behavior contracts passed");
     return 0;
 }

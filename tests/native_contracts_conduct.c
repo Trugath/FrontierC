@@ -2,13 +2,14 @@
  * Copyright (c) 2026 Elliot Stirling
  * See LICENSE in the repository root.
  *
- * Contracts for fines and delivery offers. Each check states the rule it is
- * holding. Nothing here records a defect as the expected result.
+ * Contracts for fines, delivery offers, and fuel. Each check states the rule
+ * it is holding. Nothing here records a defect as the expected result.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "objects/objects.h"
 #include "station_internal.h"
 
 #define CHECK(cond) do { \
@@ -23,6 +24,8 @@ const uint16_t fe2_station_widgets_station[31];
 const fe2_station_mission_destination fe2_station_mission_destinations[] = {{0x42u, 3}};
 const unsigned fe2_station_mission_destination_count = 1;
 
+static const uint8_t preamble_bytes[64];
+const uint8_t *fe2_objects_preamble = preamble_bytes;
 
 /* ---- station screen stand-ins: the checks record the rows and replies --- */
 
@@ -473,5 +476,139 @@ void delivery_follows_the_offer(void)
     station_talk_handler(&ctx, 0x01);
     CHECK(panels == 1 && bulletins == 1);
     CHECK(widgets_set == fe2_station_widgets_station);
+}
+
+/* ---- fuel, shields and hull --------------------------------------------- */
+
+static unsigned fuel_messages;
+
+static void fuel_message(void *context, unsigned slot, const fe2_objects_message *message)
+{
+    (void)context;
+    CHECK(slot == FE2_OBJECTS_MESSAGE_SLOT);
+    CHECK(message->selector == 0x98f0);
+    fuel_messages++;
+}
+
+static int controls_clear(const fe2_object *ship)
+{
+    unsigned i, j;
+    for (i = 0; i < 3; ++i)
+        for (j = 0; j < 2; ++j)
+            if (ship->as.flight.control_limits[i][j] != 0) return 0;
+    return 1;
+}
+
+static uint8_t descriptor[32];
+static const uint8_t *ship_model(void *context, uint16_t model)
+{
+    (void)context; (void)model;
+    return descriptor;
+}
+
+/* The last of the tank refills from cargo. Military fuel becomes spent fuel
+ * and does not free cargo space; standard fuel does. An empty tank warns
+ * once and the controls are lost. Shields recover toward their limit, half
+ * as fast without bit 28, and bit 31 recovers the hull toward four times
+ * extension word 6. */
+void fuel_and_shields_follow_the_ship(void)
+{
+    fe2_objects_state ships;
+    fe2_objects_services view;
+    fe2_object ship;
+    memset(&ships, 0, sizeof ships);
+    memset(&view, 0, sizeof view);
+    memset(&ship, 0, sizeof ship);
+    memset(descriptor, 0, sizeof descriptor);
+    descriptor[6] = 10;
+    view.message = fuel_message;
+    view.model = ship_model;
+    ships.player = 1;
+    ship.handle = 1;
+
+    ship.fuel = 500;
+    fe2_objects_consume(&ships, &view, &ship, 200);
+    CHECK(ship.fuel == 300 && fuel_messages == 0);
+
+    ship.fuel = 10;
+    ship.as.flight.equipment = 2;
+    ship.as.flight.drive = 10;
+    ships.cargo[FE2_CARGO_MILITARY_FUEL] = 3;
+    ships.cargo[FE2_CARGO_SPENT_FUEL] = 1;
+    ships.cargo_space = 8;
+    fe2_objects_consume(&ships, &view, &ship, 10);
+    CHECK(ships.cargo[FE2_CARGO_MILITARY_FUEL] == 2);
+    CHECK(ships.cargo[FE2_CARGO_SPENT_FUEL] == 2);
+    CHECK(ships.cargo_space == 8);
+    CHECK(ship.fuel == 0x20000000u);
+
+    ship.fuel = 10;
+    ship.as.flight.drive = 9;
+    ships.cargo[FE2_CARGO_STANDARD_FUEL] = 2;
+    ships.cargo_space = 8;
+    fe2_objects_consume(&ships, &view, &ship, 10);
+    CHECK(ships.cargo[FE2_CARGO_STANDARD_FUEL] == 1);
+    CHECK(ships.cargo_space == 7);
+    CHECK(ship.fuel == 0x20000000u);
+
+    ship.fuel = 1;
+    ship.as.flight.drive = 10;
+    ships.cargo[FE2_CARGO_MILITARY_FUEL] = 0;
+    ship.as.flight.control_limits[0][0] = 3;
+    fe2_objects_consume(&ships, &view, &ship, 1);
+    CHECK(ship.fuel == 0 && fuel_messages == 1 && controls_clear(&ship));
+    ship.as.flight.control_limits[0][0] = 3;
+    fe2_objects_consume(&ships, &view, &ship, 1);
+    CHECK(fuel_messages == 1 && controls_clear(&ship));
+
+    ship.fuel = 1;
+    ship.as.flight.equipment = 0;
+    ship.as.flight.drive = 9;
+    ships.cargo[FE2_CARGO_STANDARD_FUEL] = 4;
+    ships.warnings = 0;
+    fuel_messages = 0;
+    ship.as.flight.control_limits[1][1] = 4;
+    fe2_objects_consume(&ships, &view, &ship, 1);
+    CHECK(ships.cargo[FE2_CARGO_STANDARD_FUEL] == 4);
+    CHECK(ship.fuel == 0 && fuel_messages == 1 && controls_clear(&ship));
+
+    memset(&ship, 0, sizeof ship);
+    ship.handle = 2;
+    ship.drive_fuel = 1;
+    ship.as.flight.control_limits[0][0] = 3;
+    fe2_objects_consume(&ships, &view, &ship, 1);
+    CHECK(ship.drive_fuel == 0 && ship.fuel == 0x20000000u);
+    CHECK(ship.as.flight.control_limits[0][0] == 3);
+    ship.fuel = 0;
+    fe2_objects_consume(&ships, &view, &ship, 1);
+    CHECK(ship.fuel == 0 && ship.drive_fuel == 0 && controls_clear(&ship));
+
+    memset(&ship, 0, sizeof ship);
+    ship.handle = 1;
+    ship.fuel = 100;
+    ship.as.flight.shield_capacity = 64;
+    fe2_objects_update(&ships, &view, &ship, 32);
+    CHECK(ship.as.flight.shield_charge == 32);
+    ship.as.flight.shield_charge = 0;
+    ship.as.flight.equipment = 1u << 28;
+    fe2_objects_update(&ships, &view, &ship, 32);
+    CHECK(ship.as.flight.shield_charge == 64);
+
+    ship.as.flight.equipment = 1u << 31;
+    ship.hull = 0;
+    fe2_objects_update(&ships, &view, &ship, 7);
+    CHECK(ship.hull == 7);
+    fe2_objects_update(&ships, &view, &ship, 100);
+    CHECK(ship.hull == 40);
+
+    ship.as.flight.equipment = 0;
+    ship.trail = 5;
+    ship.effect = 4;
+    ship.frame_state = 0xe0;
+    fe2_objects_update(&ships, &view, &ship, 1);
+    CHECK(ship.trail == 4 && ship.effect == 3 && ship.frame_state == 0xe0);
+    fe2_objects_update(&ships, &view, &ship, 10);
+    CHECK(ship.trail == 0 && ship.effect == 0);
+    CHECK((ship.frame_state & 0x60) == 0 && (ship.frame_state & 0x80) == 0x80);
 }
 

@@ -106,6 +106,7 @@ def main():
         ROOT / 'src/game/station/interaction_text.c', ROOT / 'src/game/station/commodity_list.c',
         ROOT / 'src/game/station/charges.c', ROOT / 'src/game/station/conversation.c',
         ROOT / 'src/game/station/common.c',
+        ROOT / 'src/engine/objects/propulsion.c', ROOT / 'src/engine/objects/random.c',
         ROOT / 'src/game/station/market_space.c', ROOT / 'src/game/station/market_update.c',
         ROOT / 'src/game/commander/mining_page.c', ROOT / 'src/game/commander/passenger_page.c',
         ROOT / 'src/game/commander/crew_page.c', ROOT / 'src/game/commander/mission_page.c',
@@ -116,7 +117,7 @@ def main():
     contract_includes = [ROOT / 'src/engine', ROOT / 'src/game', ROOT / 'src/engine/math',
                          ROOT / 'src/engine/render', ROOT / 'src/engine/pool', ROOT / 'src/game/people',
                          ROOT / 'src/game/station', ROOT / 'src/game/world',
-                         ROOT / 'src/game/commander', directory]
+                         ROOT / 'src/game/commander', ROOT / 'src/engine/objects', directory]
     contract_sources = compile_native('native-contracts', contract_sources, contract_includes)
     import optional_tables_c
     optional_tables_c.speaker(directory / 'speaker_tables.h')
