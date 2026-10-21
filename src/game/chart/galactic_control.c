@@ -40,6 +40,8 @@ int fe2_map_select(fe2_map_state *state,const fe2_map_services *game,uint16_t in
     state->detail_status=details.status; state->detail_result_a=details.result_a; state->detail_result_b=details.result_b;
     if(descriptor&0x8000u) state->selection_mix=0;
     state->selection_value=map_interpolate(descriptor,0);
+    state->selection_distance = fe2_map_jump_distance(state->selection_distance,
+        state->selection_reference, state->current_system);
     if(!state->selection_distance) state->travel_result=0;
     else {
         uint16_t travel; int negative;

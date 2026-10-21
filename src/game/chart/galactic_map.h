@@ -129,6 +129,13 @@ fe2_map_position fe2_map_decode_record(uint16_t y, uint16_t x, const fe2_map_rec
 int fe2_map_nearest(const fe2_map_scene *, uint8_t y, uint8_t x);
 void fe2_map_project_vector(const int16_t matrix[9],const int16_t vector[3],uint32_t projected[3]);
 int fe2_map_distance(const fe2_map_services *, const fe2_map_position *, const fe2_map_position *, uint32_t *);
+/* A selected system at the ship's position is no jump. A different system
+ * that lands on the same position is one jump unit away. */
+static inline uint32_t fe2_map_jump_distance(uint32_t distance, uint32_t selected, uint32_t current)
+{
+    if (!distance && selected != current) return 1;
+    return distance;
+}
 int fe2_map_name(const fe2_map_services *, uint16_t y, uint16_t x, uint16_t index, char *, size_t);
 int fe2_map_format_text(const fe2_map_services *, uint16_t selector, uint16_t y, uint16_t x,
                          uint16_t index, uint32_t reference, const fe2_call_args *, char *, size_t);

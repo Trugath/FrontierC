@@ -11,6 +11,7 @@
 
 #include "commander/status_internal.h"
 #include "station/market_internal.h"
+#include "chart/galactic_map.h"
 #include "market_blob.h"
 #include "status_tables_data.h"
 
@@ -161,10 +162,20 @@ static void export_prices_are_not_negative(void)
     printf("Export prices are not negative\n");
 }
 
+/* A second system on the same map position can still be jumped to. */
+static void coincident_systems_can_be_jumped(void)
+{
+    assert(fe2_map_jump_distance(0, 2, 1) == 1);
+    assert(fe2_map_jump_distance(0, 1, 1) == 0);
+    assert(fe2_map_jump_distance(40, 2, 1) == 40);
+    printf("A coincident system is one jump unit away\n");
+}
+
 int main(void)
 {
     failed_mission_demotes_its_own_navy();
     abandoned_passengers_free_cabins();
     export_prices_are_not_negative();
+    coincident_systems_can_be_jumped();
     return 0;
 }
