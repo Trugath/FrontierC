@@ -56,9 +56,11 @@ static uint16_t price(fe2_market_state *s, const fe2_market_services *game, unsi
                                             PRICE_RANDOM_BASE) * (int16_t)value);
     if (doubling_overflows(product) || doubling_overflows(product << 1)) return 0x7fff;
     result = (uint16_t)((product << 2) >> 16);
-    /* A negative price pays the commander to take the goods away. An export
-     * discount that passes the base price is a zero charge instead. */
-    return result & 0x8000u ? 0 : result;
+    /* Radioactives and rubbish start from a negative base: the station pays
+     * to have them hauled away, and selling them charges the hold. A positive
+     * base driven through zero is a free purchase instead. */
+    if ((result & 0x8000u) && !(p[0] & 0x8000u)) return 0;
+    return result;
 }
 
 /* never negative. */

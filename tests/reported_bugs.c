@@ -134,7 +134,8 @@ static uint32_t price_sample(void *opaque, uint32_t *high)
     return next_price_sample;
 }
 
-/* Export discounts do not pay the commander to remove the goods. */
+/* A positive base driven through zero is free. Radioactives and rubbish
+ * stay negative, so the station pays to have them taken. */
 static void export_prices_are_not_negative(void)
 {
     static fe2_market_state state;
@@ -155,12 +156,13 @@ static void export_prices_are_not_negative(void)
                 fe2_market_set_prices(&state, &game, 0);
                 for (commodity = 0; commodity < FE2_COMMODITIES; ++commodity) {
                     uint16_t price = fe2_market_word(&state, 4u * commodity + 2u);
-                    assert((price & 0x8000u) == 0);
+                    int waste = commodity >= FE2_COMMODITIES - 2;
+                    assert(waste ? (price & 0x8000u) != 0 : (price & 0x8000u) == 0);
                 }
             }
         }
     }
-    printf("Export prices are not negative\n");
+    printf("Only waste has a negative price\n");
 }
 
 static fe2_ship_stats hull_of(void *opaque, uint16_t model)
