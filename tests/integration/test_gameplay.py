@@ -1,7 +1,7 @@
 """Headless gameplay checks.
 
-The game is built once. Each test runs gameplay-check with a scenario name
-from tests/gameplay/.
+The game is built once. Each test runs gameplay-check with a scenario name.
+The session driver and one file per subject live in tests/gameplay/.
 """
 import os
 import re
@@ -41,7 +41,7 @@ class Gameplay(unittest.TestCase):
         audio.append(ROOT / 'src/engine/audio/roland/roland.c')
         audio.extend(ROOT / 'src/engine/audio/speaker' / name for name in
                      ('speaker_player.c', 'speaker_services.c', 'speaker_tables.c'))
-        checks = [ROOT / 'tests/native_gameplay_check.c', *sorted((ROOT / 'tests/gameplay').glob('*.c'))]
+        checks = sorted((ROOT / 'tests/gameplay').glob('*.c'))
         libs = ['-lwinmm'] if sys.platform == 'win32' else ['-lasound', '-pthread']
         Gameplay.check = directory / 'gameplay-check.exe'
         subprocess.run([str(ZIG), 'cc', '-std=c99', '-g', '-O0', '-Wall', '-Wextra', '-Werror', '-pedantic',

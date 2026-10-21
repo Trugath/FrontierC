@@ -9,7 +9,7 @@ import extract_assets
 import graphics_resources
 import resource_sources
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def bank_image(kind, ini):

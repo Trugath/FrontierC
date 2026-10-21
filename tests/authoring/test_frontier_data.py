@@ -8,7 +8,7 @@ from pathlib import Path
 
 from frontier_data import read_archive, records_from_assets, write_archive, write_tree
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 DATA_SOURCES = (
     'data_tool.c', 'asset_archive.c', 'asset_files.c', 'asset_ini.c', 'asset_image.c',
     'inflate.c', 'sha256.c', 'asset_program.c', 'asset_decode.c', 'asset_model.c',

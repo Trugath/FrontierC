@@ -12,7 +12,7 @@ from data_tables import dispatch_words
 
 class StationTables(unittest.TestCase):
     def test_recovered_blocks_unchanged(self):
-        expected = json.loads((tables.ROOT / 'tests/station_data_hashes.json').read_text())
+        expected = json.loads((tables.ROOT / 'tests/authoring/station_data_hashes.json').read_text())
         self.assertEqual({hex(offset): hashlib.sha256(data).hexdigest() for offset, data in tables.blocks()}, expected)
 
     def test_native_generation_does_not_read_guest_image(self):

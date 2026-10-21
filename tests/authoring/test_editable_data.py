@@ -20,7 +20,7 @@ class EditableData(unittest.TestCase):
         import mining_resources_c
         import mining_parameters_c
         import optional_tables_c
-        expected = json.loads((ROOT / 'tests/editable_data_hashes.json').read_text())
+        expected = json.loads((ROOT / 'tests/authoring/editable_data_hashes.json').read_text())
         pairs = [
             ('market_image', market_resources_c.resources()),
             ('mining_parameters', mining_parameters_c.resources()),

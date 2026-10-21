@@ -6,7 +6,7 @@ import unittest
 
 from render_material_resources import read_materials
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 RESOURCE = ROOT / 'data/main/frontier'
 
 

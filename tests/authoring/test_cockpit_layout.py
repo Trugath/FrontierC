@@ -16,7 +16,7 @@ class CockpitLayout(unittest.TestCase):
     def test_all_recovered_flight_blocks_preserved(self):
         if not (layout.ROOT / 'data/text/flight/strings.tsv').is_file():
             self.skipTest('unpacked flight text is not present')
-        expected = json.loads((layout.ROOT / 'tests/cockpit_data_hashes.json').read_text())
+        expected = json.loads((layout.ROOT / 'tests/authoring/cockpit_data_hashes.json').read_text())
         actual = {hex(offset): hashlib.sha256(data).hexdigest() for offset, data in flight_tables_c.blocks()}
         self.assertEqual(actual, expected)
 

@@ -250,7 +250,7 @@ class RendererPrograms(unittest.TestCase):
                 compile_source(source)
 
     def test_all_native_models_roundtrip_without_crossing_contact_insertions(self):
-        root = Path(__file__).resolve().parents[1] / 'data'
+        root = Path(__file__).resolve().parents[2] / 'data'
         if not any((root / 'models/frontier/models').glob('*.model')):
             self.skipTest('unpacked model sources are not present')
         paths = []

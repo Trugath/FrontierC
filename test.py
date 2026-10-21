@@ -18,7 +18,11 @@ def main():
     args = parser.parse_args()
     if args.python_only and args.integration:
         parser.error("--python-only and --integration are mutually exclusive")
-    suite = unittest.defaultTestLoader.discover(str(ROOT / 'tests'))
+    suite = unittest.TestSuite()
+    for name in ('authoring', 'reported'):
+        directory = str(ROOT / 'tests' / name)
+        suite.addTests(unittest.TestLoader().discover(directory, pattern='test_*.py',
+                                                      top_level_dir=directory))
     if not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful():
         return 1
     if args.python_only:
@@ -68,7 +72,7 @@ def main():
         subprocess.run([str(output)], check=True)
         return sources
 
-    sources = [ROOT / 'tests/native_tests.c', ROOT / 'src/engine/game/call_args.c',
+    sources = [ROOT / 'tests/behavior/native_tests.c', ROOT / 'src/engine/game/call_args.c',
                ROOT / 'src/game/world/system_lookup.c', ROOT / 'src/game/world/system_record.c',
                ROOT / 'src/game/world/catalogue_tables.c', directory / 'math3_tables.c']
     sources += sorted((ROOT / 'src/game/mining').glob('*.c'))
@@ -84,7 +88,7 @@ def main():
     market_tables_c.write_tables(directory / 'market_tables_data.h')
     write_blob(directory / 'market_blob.h', 'fe2_test_market', market_resources())
     reported_sources = [
-        ROOT / 'tests/reported_bugs.c', ROOT / 'src/engine/game/call_args.c',
+        ROOT / 'tests/reported/reported_bugs.c', ROOT / 'src/engine/game/call_args.c',
         ROOT / 'src/game/commander/missions.c', ROOT / 'src/game/commander/military_rank.c',
         ROOT / 'src/game/commander/contracts.c', ROOT / 'src/game/commander/page_layout.c',
         ROOT / 'src/game/station/commodity_prices.c', ROOT / 'src/game/station/market_space.c',
@@ -94,8 +98,9 @@ def main():
     import interaction_text_c
     interaction_text_c.write_tables(directory / 'interaction_tables.h')
     contract_sources = [
-        ROOT / 'tests/native_contracts.c', ROOT / 'tests/native_contracts_equipment.c',
-        ROOT / 'tests/native_contracts_conduct.c',
+        ROOT / 'tests/contracts/native_contracts.c',
+        ROOT / 'tests/contracts/native_contracts_equipment.c',
+        ROOT / 'tests/contracts/native_contracts_conduct.c',
         ROOT / 'src/engine/game/call_args.c',
         ROOT / 'src/engine/math/contexts.c',
         ROOT / 'src/engine/pool/equipment_effects.c', ROOT / 'src/engine/pool/pool_visitors.c',
@@ -128,7 +133,7 @@ def main():
         optional_tables_c.roland(directory / 'roland_tables.h')
     else:
         print('Optional MIDI checks were not compiled. Unpack the Roland effect scores and music first.', flush=True)
-    optional_sources = [ROOT / 'tests/native_optional_tests.c']
+    optional_sources = [ROOT / 'tests/optional/native_optional_tests.c']
     for folder in ('speaker', 'roland'):
         optional_sources += sorted((ROOT / 'src/engine/audio' / folder).glob('*.c'))
     optional_sources += sorted((ROOT / 'src/game/setup').glob('*.c'))

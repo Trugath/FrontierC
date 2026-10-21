@@ -76,7 +76,7 @@ end_records
                 compile_source(source)
 
     def test_all_geometry_files_roundtrip(self):
-        root = Path(__file__).resolve().parents[1] / 'data'
+        root = Path(__file__).resolve().parents[2] / 'data'
         if not any(root.rglob('*.geometry')):
             self.skipTest('unpacked model geometry is not present')
         paths = list(root.rglob('*.geometry'))

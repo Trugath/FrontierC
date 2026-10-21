@@ -49,7 +49,7 @@ class Authoring(unittest.TestCase):
         import market_resources_c
         import systems_resources_c
         import systems_tables_c
-        expected = json.loads((ROOT / 'tests/reference_table_hashes.json').read_text())
+        expected = json.loads((ROOT / 'tests/authoring/reference_table_hashes.json').read_text())
         blobs = {'profile_callbacks': systems_resources_c.profile_callbacks()[1]}
         if (ROOT / 'data/adlib/pitch_curves.csv').is_file():
             blobs['pitch'] = adlib_tables_c.pitch_image()[0]
@@ -68,7 +68,7 @@ class Authoring(unittest.TestCase):
     def test_model_banks_preserve_pre_refactor_data(self):
         if not any((ROOT / 'data/models/frontier/models').glob('*.model')):
             self.skipTest('unpacked model sources are not present')
-        expected = json.loads((ROOT / 'tests/model_bank_hashes.json').read_text())
+        expected = json.loads((ROOT / 'tests/authoring/model_bank_hashes.json').read_text())
         for name, checksum in expected.items():
             with self.subTest(bank=name):
                 bank = document('main_models', ROOT / 'data/models' / name / 'models.ini')

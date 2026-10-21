@@ -6,36 +6,36 @@ Run `python test.py --integration` from the repository root. The default
 
 The suite contains:
 
-- Resource grammar, encoding and invalid-input tests, including every unpacked
-  model program and geometry source, all typed table manifests, all native C
-  table generators, and concurrent resource publication. The model round-trip
-  reads 353 local `.model` files under `data/`. Unpack a Frontier install
-  before running it. Sprite, font, music, description, dialogue, and setup-message
-  checks read the same local unpack.
-- Data migration fixtures that pin the compiled model banks, pitch tables,
-  dispatch tables and full systems image. Intentional game-data changes need
-  corresponding fixture review rather than silently replacing baselines.
-- Native C tests for mining slot limits, hopper boundaries, recovery and record
-  compaction; catalogue lookup and fallback boundaries; normalized scalar
-  round trips and integer quirks; keyboard decoding, pointer-region capacity,
-  and wrapped system-record storage.
-- Standalone native checks for PC speaker effects, all supported Roland effect
+- `tests/authoring/` holds the resource grammar, encoding and invalid-input
+  tests, including every unpacked model program and geometry source, all typed
+  table manifests, all native C table generators, and concurrent resource
+  publication. The model round-trip reads 353 local `.model` files under
+  `data/`. Unpack a Frontier install before running it. Sprite, font, music,
+  description, dialogue, and setup-message checks read the same local unpack.
+  The hash fixtures beside those tests pin the compiled model banks, pitch
+  tables, dispatch tables and full systems image. Intentional game-data changes
+  need corresponding fixture review rather than silently replacing baselines.
+  The naming regression audit is in the same directory.
+- `tests/behavior/native_tests.c` checks mining slot limits, hopper boundaries,
+  recovery and record compaction; catalogue lookup and fallback boundaries;
+  normalized scalar round trips and integer quirks; keyboard decoding,
+  pointer-region capacity, and wrapped system-record storage.
+- `tests/optional/` checks PC speaker effects, all supported Roland effect
   selections and music tracks, and setup-check failure paths and sound choices.
-- Headless gameplay checks. `tests/native_gameplay_check.c` boots the session
-  and `tests/gameplay/` holds one file per subject: flight, navigation,
-  station, commander, and screens. `tests/integration/test_gameplay.py` groups
-  the same subjects. One station check runs a trading, mission, flight and
-  mining loop and locks the assembly defects those paths still have. A separate
-  model-viewer check verifies deterministic frame rendering and textured rendering.
-- Reported defects in `tests/reported_bugs.c`, with the Imperial crew counts
-  checked from the ship table in `tests/test_reported_bugs.py`.
-- Behavior contracts in `tests/native_contracts.c` for the commander pages,
-  price list, daily market update, equipment effects, docking approach,
-  interaction text, render contexts, textured surfaces and generated stations.
-  `tests/native_contracts_conduct.c` checks fines, delivery offers, fuel and
-  shields, and the texture raster. These checks follow the stated rule. They
-  do not record a defect as the expected result.
-- A naming regression audit and a compilation inventory that rejects retained
+- `tests/gameplay/` boots the session and holds one file per subject: flight,
+  navigation, station, commander, and screens. `tests/integration/test_gameplay.py`
+  groups the same subjects. One station check runs a trading, mission, flight
+  and mining loop and locks the assembly defects those paths still have. A
+  separate model-viewer check verifies deterministic frame rendering and
+  textured rendering.
+- `tests/reported/` checks reported defects, including the Imperial crew counts
+  from the ship table.
+- `tests/contracts/` checks the commander pages, price list, daily market
+  update, equipment effects, docking approach, interaction text, render
+  contexts, textured surfaces and generated stations, plus fines, delivery
+  offers, fuel and shields, and the texture raster. These checks follow the
+  stated rule. They do not record a defect as the expected result.
+- `tests/integration/` includes a compilation inventory that rejects retained
   C sources omitted from the native build/test targets.
 
 Native test executables explicitly enable C assertions. Game libraries compile
