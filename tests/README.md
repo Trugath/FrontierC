@@ -32,8 +32,8 @@ The suite contains:
 - Behavior contracts in `tests/native_contracts.c` for the commander pages,
   price list, daily market update, equipment effects, docking approach,
   interaction text, render contexts, textured surfaces and generated stations.
-  These checks follow the stated rule. They do not record a defect as the
-  expected result.
+  `tests/native_contracts_conduct.c` checks fines. These checks follow the
+  stated rule. They do not record a defect as the expected result.
 - A naming regression audit and a compilation inventory that rejects retained
   C sources omitted from the native build/test targets.
 

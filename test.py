@@ -95,6 +95,7 @@ def main():
     interaction_text_c.write_tables(directory / 'interaction_tables.h')
     contract_sources = [
         ROOT / 'tests/native_contracts.c', ROOT / 'tests/native_contracts_equipment.c',
+        ROOT / 'tests/native_contracts_conduct.c',
         ROOT / 'src/engine/game/call_args.c',
         ROOT / 'src/engine/math/contexts.c',
         ROOT / 'src/engine/pool/equipment_effects.c', ROOT / 'src/engine/pool/pool_visitors.c',
@@ -103,6 +104,8 @@ def main():
         ROOT / 'src/engine/render/spans.c', ROOT / 'src/engine/render/clip.c',
         ROOT / 'src/game/people/delta_updates.c', ROOT / 'src/game/people/services.c',
         ROOT / 'src/game/station/interaction_text.c', ROOT / 'src/game/station/commodity_list.c',
+        ROOT / 'src/game/station/charges.c', ROOT / 'src/game/station/conversation.c',
+        ROOT / 'src/game/station/common.c',
         ROOT / 'src/game/station/market_space.c', ROOT / 'src/game/station/market_update.c',
         ROOT / 'src/game/commander/mining_page.c', ROOT / 'src/game/commander/passenger_page.c',
         ROOT / 'src/game/commander/crew_page.c', ROOT / 'src/game/commander/mission_page.c',

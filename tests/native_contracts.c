@@ -17,6 +17,7 @@
 #include "render/texture.h"
 
 void equipment_bits_drive_the_effect(void);
+void fines_follow_the_charge_rules(void);
 #include "people_internal.h"
 #include "interaction_text.h"
 #include "market_internal.h"
@@ -1179,6 +1180,7 @@ int main(void)
     mission_page_describes_kills_and_recon();
     generated_stations_copy_the_city_and_stop_at_the_cap();
     sol_stations_are_copies_of_the_named_templates();
+    fines_follow_the_charge_rules();
     puts("Behavior contracts passed");
     return 0;
 }
