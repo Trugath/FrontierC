@@ -92,8 +92,39 @@ static void failed_mission_demotes_its_own_navy(void)
     printf("A failed mission demotes its own navy\n");
 }
 
+/* Passengers who abandon the ship free the cabins they occupied. */
+static void abandoned_passengers_free_cabins(void)
+{
+    static fe2_commander_status status;
+    fe2_game_services game;
+    services(&game);
+    memset(&status, 0, sizeof status);
+    status.contract_count = 1;
+    status.contracts[0].client = 1;
+    status.contracts[0].kind = FE2_CONTRACT_EXPIRED;
+    status.contracts[0].group = 0;
+    status.cabins_used = 1;
+    status.reliability = 5;
+    fe2_status_scan_arrivals(&status, &game);
+    assert(status.contract_count == 0);
+    assert(status.cabins_used == 0);
+
+    memset(&status, 0, sizeof status);
+    status.contract_count = 1;
+    status.contracts[0].client = 1;
+    status.contracts[0].kind = FE2_CONTRACT_EXPIRED;
+    status.contracts[0].group = (uint8_t)(3u << 2);
+    status.cabins_used = 4;
+    status.reliability = 5;
+    fe2_status_scan_arrivals(&status, &game);
+    assert(status.contract_count == 0);
+    assert(status.cabins_used == 0);
+    printf("Abandoned passengers free their cabins\n");
+}
+
 int main(void)
 {
     failed_mission_demotes_its_own_navy();
+    abandoned_passengers_free_cabins();
     return 0;
 }

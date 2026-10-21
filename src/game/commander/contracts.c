@@ -192,8 +192,10 @@ static int settle_expired(fe2_commander_status *status, const fe2_game_services 
         seed = (seed >> 8) | (seed << 24);
         fe2_args_dword(&args, PARAM_1, seed);
     } else {
-        /* One fewer cabin than a delivery frees. */
-        status->cabins_used = (uint16_t)(status->cabins_used - (int16_t)((contract.group >> 2) - 1));
+        /* The original subtracted (group >> 2) - 1. A lone passenger then
+         * added a cabin instead of freeing it, and the cabin stayed occupied
+         * after the passenger had left. */
+        status->cabins_used = (uint16_t)(status->cabins_used - cabins_of(&contract));
     }
     game->generate_name(game->opaque, CLIENT_NAME_MODE, seed, name);
     client_says(game, &args, seed, name, REPORTED_TEXT);
