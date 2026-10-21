@@ -107,6 +107,7 @@ def main():
         ROOT / 'src/game/station/charges.c', ROOT / 'src/game/station/conversation.c',
         ROOT / 'src/game/station/common.c',
         ROOT / 'src/engine/objects/propulsion.c', ROOT / 'src/engine/objects/random.c',
+        ROOT / 'src/engine/render/backend_texture.c',
         ROOT / 'src/game/station/market_space.c', ROOT / 'src/game/station/market_update.c',
         ROOT / 'src/game/commander/mining_page.c', ROOT / 'src/game/commander/passenger_page.c',
         ROOT / 'src/game/commander/crew_page.c', ROOT / 'src/game/commander/mission_page.c',

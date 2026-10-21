@@ -2,13 +2,15 @@
  * Copyright (c) 2026 Elliot Stirling
  * See LICENSE in the repository root.
  *
- * Contracts for fines, delivery offers, and fuel. Each check states the rule
- * it is holding. Nothing here records a defect as the expected result.
+ * Contracts for fines, delivery offers, fuel and the texture raster. Each
+ * check states the rule it is holding. Nothing here records a defect as the
+ * expected result.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "backend.h"
 #include "objects/objects.h"
 #include "station_internal.h"
 
@@ -612,3 +614,139 @@ void fuel_and_shields_follow_the_ship(void)
     CHECK((ship.frame_state & 0x60) == 0 && (ship.frame_state & 0x80) == 0x80);
 }
 
+/* ---- texture divide and raster ------------------------------------------ */
+
+static unsigned solid_calls;
+static uint8_t solid_color;
+
+int fe2_render_solid_polygon(const fe2_screen_point *points, unsigned count, uint8_t color,
+                             int clipped, fe2_render_span_fn span, void *context)
+{
+    (void)points; (void)count; (void)clipped; (void)span; (void)context;
+    solid_calls++;
+    solid_color = color;
+    return 0;
+}
+
+typedef struct span_log { unsigned image_pixels, other; } span_log;
+static fe2_render_texture_image supplied;
+
+static int supply_texture(void *context, unsigned selector, fe2_render_texture_image *out)
+{
+    (void)context;
+    CHECK(selector == 1);
+    *out = supplied;
+    return 0;
+}
+static uint8_t color_of(void *context, uint16_t material)
+{
+    (void)context;
+    return (uint8_t)material;
+}
+
+static void take_span(void *context, unsigned y, unsigned x, unsigned count, uint8_t color)
+{
+    span_log *log = context;
+    (void)y; (void)x;
+    if (count == 0) count = 1;
+    if (color == 0x2c) log->image_pixels += count;
+    else {
+        CHECK(color == 0x11);
+        log->other += count;
+    }
+}
+
+/* A zero denominator saturates by sign. A quotient that fits keeps the fine
+ * scale; one that does not uses the coarse scale; one that fits neither
+ * saturates. A zero numerator keeps the deliberate one-byte bias. A bad
+ * image or point is rejected. A triangle and a quad sample the image. A quad that is
+ * not a surface falls back to a solid polygon. */
+void texture_raster_samples_the_image(void)
+{
+    uint8_t pixels[64], palette[256];
+    fe2_render_texture_image image;
+    fe2_screen_point triangle[3], quad[4], outside[3];
+    span_log log;
+    fe2_render_texture_command command;
+    fe2_render_backend backend;
+    int drawn;
+
+    CHECK(fe2_render_texture_divide(5, 0) == 0x7fffffffu);
+    CHECK(fe2_render_texture_divide(-5, 0) == 0x80000001u);
+    CHECK(fe2_render_texture_divide(0, 1) == 0xff00u);
+    CHECK(fe2_render_texture_divide(8, 2) == 0x3ff00u);
+    CHECK(fe2_render_texture_divide(-8, 2) == 0xfffc0100u);
+    CHECK(fe2_render_texture_divide(8, -2) == 0xfffc0100u);
+    CHECK(fe2_render_texture_divide(256, 1) == 0x01000000u);
+    CHECK(fe2_render_texture_divide(30000, 1) == 0x7fffffffu);
+    CHECK(fe2_render_texture_divide(-30000, 1) == 0x80000001u);
+
+    memset(pixels, 3, sizeof pixels);
+    memset(palette, 0, sizeof palette);
+    palette[0] = 0x11;
+    palette[3] = 0x2c;
+    image.pixels = pixels;
+    image.bytes = sizeof pixels;
+    image.width = 8;
+    image.height = 8;
+    CHECK(fe2_render_draw_texture_image(NULL, 3, 0, &image, palette, take_span, &log) == -1);
+    triangle[0].x = 30; triangle[0].y = 40;
+    triangle[1].x = 90; triangle[1].y = 40;
+    triangle[2].x = 30; triangle[2].y = 100;
+    CHECK(fe2_render_draw_texture_image(triangle, 2, 0, &image, palette, take_span, &log) == -1);
+    image.width = 0;
+    CHECK(fe2_render_draw_texture_image(triangle, 3, 0, &image, palette, take_span, &log) == -1);
+    image.width = 256;
+    CHECK(fe2_render_draw_texture_image(triangle, 3, 0, &image, palette, take_span, &log) == -1);
+    image.width = 8;
+    outside[0] = triangle[0];
+    outside[1] = triangle[1];
+    outside[2].x = 2321;
+    outside[2].y = 40;
+    CHECK(fe2_render_draw_texture_image(outside, 3, 0, &image, palette, take_span, &log) == -1);
+
+    memset(&log, 0, sizeof log);
+    drawn = fe2_render_draw_texture_image(triangle, 3, 0, &image, palette, take_span, &log);
+    CHECK(drawn == 0 && log.image_pixels > 0);
+    quad[0].x = 40; quad[0].y = 40;
+    quad[1].x = 80; quad[1].y = 40;
+    quad[2].x = 80; quad[2].y = 70;
+    quad[3].x = 40; quad[3].y = 70;
+    memset(&log, 0, sizeof log);
+    drawn = fe2_render_draw_texture_image(quad, 4, 0x1000, &image, palette, take_span, &log);
+    CHECK(drawn == 0 && log.image_pixels > 0);
+
+    quad[0].x = 0; quad[0].y = 0;
+    quad[1].x = 10; quad[1].y = 0;
+    quad[2].x = 10; quad[2].y = 10;
+    quad[3].x = 0; quad[3].y = 0;
+    solid_calls = 0;
+    drawn = fe2_render_draw_texture_image(quad, 4, 0, &image, palette, take_span, &log);
+    CHECK(drawn == 2 && solid_calls == 1 && solid_color == palette[0]);
+
+    memset(&backend, 0, sizeof backend);
+    CHECK(fe2_render_draw_texture(NULL, &backend) == -1);
+    memset(&command, 0, sizeof command);
+    supplied = image;
+    backend.span = take_span;
+    backend.context = &log;
+    backend.color = color_of;
+    backend.texture = supply_texture;
+    backend.texture_map = palette;
+    command.texture = 1;
+    command.count = 3;
+    command.color_count = 8;
+    CHECK(fe2_render_draw_texture(&command, &backend) == -1);
+    command.color_count = 1;
+    command.count = 2;
+    CHECK(fe2_render_draw_texture(&command, &backend) == -1);
+    command.count = 3;
+    command.colors[0] = 0x11;
+    command.points[0] = triangle[0];
+    command.points[1] = triangle[1];
+    command.points[2] = triangle[2];
+    memset(&log, 0, sizeof log);
+    CHECK(fe2_render_draw_texture(&command, &backend) == 0);
+    CHECK(log.image_pixels > 0);
+    fe2_render_backend_texture(&backend, &command);
+}
